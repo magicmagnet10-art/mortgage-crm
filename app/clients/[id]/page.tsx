@@ -1,0 +1,99 @@
+import { createClient } from "@/lib/supabase/server";
+import { notFound } from "next/navigation";
+import Link from "next/link";
+import { BANKS } from "@/lib/constants";
+import { BankLogEntry } from "@/lib/types";
+import BankSection from "@/components/BankSection";
+
+function formatCurrency(amount: number) {
+  return new Intl.NumberFormat("he-IL", {
+    style: "currency",
+    currency: "ILS",
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
+
+export default async function ClientPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const supabase = await createClient();
+
+  const { data: client } = await supabase
+    .from("clients")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (!client) notFound();
+
+  const { data: entries } = await supabase
+    .from("bank_log_entries")
+    .select("*")
+    .eq("client_id", id)
+    .order("created_at", { ascending: true });
+
+  const entriesByBank: Record<string, BankLogEntry[]> = {};
+  BANKS.forEach((bank) => {
+    entriesByBank[bank] = (entries ?? []).filter((e) => e.bank_name === bank);
+  });
+
+  return (
+    <main className="min-h-screen bg-gray-50 p-6" dir="rtl">
+      <div className="max-w-5xl mx-auto">
+        <Link
+          href="/"
+          className="text-sm text-blue-600 hover:underline mb-6 inline-block"
+        >
+          ← חזרה לרשימה
+        </Link>
+
+        {/* Client Header */}
+        <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6 shadow-sm">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">
+            {client.full_name}
+          </h1>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <div>
+              <p className="text-xs text-gray-400 mb-0.5">תעודת זהות</p>
+              <p className="font-medium text-gray-800">{client.id_number}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-400 mb-0.5">טלפון</p>
+              <p className="font-medium text-gray-800">{client.phone}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-400 mb-0.5">סכום משכנתא</p>
+              <p className="font-medium text-gray-800">
+                {formatCurrency(client.mortgage_amount)}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-400 mb-0.5">שווי נכס</p>
+              <p className="font-medium text-gray-800">
+                {formatCurrency(client.property_value)}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Banks */}
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">
+          משא ומתן מול בנקים
+        </h2>
+        <div className="grid gap-4">
+          {BANKS.map((bank) => (
+            <BankSection
+              key={bank}
+              bank={bank}
+              clientId={id}
+              entries={entriesByBank[bank]}
+            />
+          ))}
+        </div>
+      </div>
+    </main>
+  );
+}

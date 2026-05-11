@@ -48,20 +48,21 @@ export default function BankSection({
   };
 
   const colors = BANK_COLORS[bank] ?? {
-    border: "border-gray-200",
-    title: "text-gray-800",
-    badge: "bg-gray-50 text-gray-600",
+    border: "#d1d5db",
+    titleColor: "#374151",
+    badgeBg: "#f9fafb",
+    badgeColor: "#4b5563",
   };
 
   return (
-    <Card className={`border-2 ${colors.border}`}>
+    <Card className="border-2" style={{ borderColor: colors.border }}>
       <CardHeader
         className="cursor-pointer select-none py-4 px-5"
         onClick={() => setOpen((o) => !o)}
       >
         <div className="flex items-center justify-between">
           <div className="flex flex-col gap-1 flex-1 min-w-0">
-            <CardTitle className={`text-base font-semibold ${colors.title}`}>
+            <CardTitle className="text-base font-semibold" style={{ color: colors.titleColor }}>
               {bank}
             </CardTitle>
             {!open && entries.length > 0 && (
@@ -72,7 +73,10 @@ export default function BankSection({
           </div>
           <div className="flex items-center gap-3 mr-3 shrink-0">
             {entries.length > 0 && (
-              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${colors.badge}`}>
+              <span
+                className="text-xs px-2 py-0.5 rounded-full font-medium"
+                style={{ backgroundColor: colors.badgeBg, color: colors.badgeColor }}
+              >
                 {entries.length} רשומות
               </span>
             )}

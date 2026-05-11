@@ -10,40 +10,47 @@ export const BANKS = [
 
 export type Bank = (typeof BANKS)[number];
 
-export const BANK_COLORS: Record<string, { border: string; title: string; badge: string }> = {
+export const BANK_COLORS: Record<string, { border: string; titleColor: string; badgeBg: string; badgeColor: string }> = {
   "מזרחי טפחות": {
-    border: "border-orange-300",
-    title: "text-orange-700",
-    badge: "bg-orange-50 text-orange-600",
+    border: "#fb923c",
+    titleColor: "#c2410c",
+    badgeBg: "#fff7ed",
+    badgeColor: "#c2410c",
   },
   "הפועלים": {
-    border: "border-red-300",
-    title: "text-red-700",
-    badge: "bg-red-50 text-red-600",
+    border: "#f87171",
+    titleColor: "#b91c1c",
+    badgeBg: "#fef2f2",
+    badgeColor: "#b91c1c",
   },
   "דיסקונט": {
-    border: "border-green-300",
-    title: "text-green-700",
-    badge: "bg-green-50 text-green-600",
+    border: "#4ade80",
+    titleColor: "#15803d",
+    badgeBg: "#f0fdf4",
+    badgeColor: "#15803d",
   },
   "לאומי": {
-    border: "border-sky-300",
-    title: "text-sky-700",
-    badge: "bg-sky-50 text-sky-600",
+    border: "#38bdf8",
+    titleColor: "#0369a1",
+    badgeBg: "#f0f9ff",
+    badgeColor: "#0369a1",
   },
   "הבינלאומי": {
-    border: "border-blue-300",
-    title: "text-yellow-700",
-    badge: "bg-blue-50 text-blue-600",
+    border: "#60a5fa",
+    titleColor: "#1d4ed8",
+    badgeBg: "#eff6ff",
+    badgeColor: "#1d4ed8",
   },
   "ירושלים": {
-    border: "border-yellow-300",
-    title: "text-yellow-700",
-    badge: "bg-yellow-50 text-yellow-600",
+    border: "#fbbf24",
+    titleColor: "#b45309",
+    badgeBg: "#fffbeb",
+    badgeColor: "#b45309",
   },
   "חוץ בנקאי": {
-    border: "border-gray-300",
-    title: "text-gray-700",
-    badge: "bg-gray-50 text-gray-600",
+    border: "#d1d5db",
+    titleColor: "#4b5563",
+    badgeBg: "#f9fafb",
+    badgeColor: "#4b5563",
   },
 };

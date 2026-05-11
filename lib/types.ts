@@ -9,6 +9,7 @@ export interface Client {
   residence: string | null;
   equity: number | null;
   payment: number | null;
+  archived_at: string | null;
   created_at: string;
 }
 

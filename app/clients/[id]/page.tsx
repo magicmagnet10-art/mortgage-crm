@@ -4,6 +4,8 @@ import Link from "next/link";
 import { BANKS } from "@/lib/constants";
 import { BankLogEntry } from "@/lib/types";
 import BankSection from "@/components/BankSection";
+import EditClientDialog from "@/components/EditClientDialog";
+import ArchiveButton from "@/components/ArchiveButton";
 
 function formatCurrency(amount: number) {
   return new Intl.NumberFormat("he-IL", {
@@ -52,9 +54,15 @@ export default async function ClientPage({
 
         {/* Client Header */}
         <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6 shadow-sm">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">
-            {client.full_name}
-          </h1>
+          <div className="flex items-start justify-between mb-4">
+            <h1 className="text-2xl font-bold text-gray-900">
+              {client.full_name}
+            </h1>
+            <div className="flex gap-2">
+              <EditClientDialog client={client} />
+              <ArchiveButton clientId={client.id} isArchived={!!client.archived_at} />
+            </div>
+          </div>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             <div>
               <p className="text-xs text-gray-400 mb-0.5">תעודת זהות</p>

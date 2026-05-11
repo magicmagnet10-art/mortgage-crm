@@ -12,7 +12,7 @@ function formatCurrency(amount: number) {
   }).format(amount);
 }
 
-export default function ClientCard({ client }: { client: Client }) {
+export default function ClientCard({ client, lastTask }: { client: Client; lastTask?: string }) {
   return (
     <Link href={`/clients/${client.id}`}>
       <Card className="hover:shadow-md transition-shadow cursor-pointer border border-gray-200">
@@ -39,6 +39,12 @@ export default function ClientCard({ client }: { client: Client }) {
               </p>
             </div>
           </div>
+          {lastTask && (
+            <div className="mt-3 pt-3 border-t border-gray-100 flex items-start gap-2">
+              <span className="text-xs font-medium text-purple-600 shrink-0 mt-0.5">משימה:</span>
+              <p className="text-xs text-gray-600 line-clamp-1">{lastTask}</p>
+            </div>
+          )}
         </CardContent>
       </Card>
     </Link>

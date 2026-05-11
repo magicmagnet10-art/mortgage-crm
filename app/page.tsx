@@ -18,6 +18,17 @@ export default async function Home({
     .select("*")
     .order("created_at", { ascending: false });
 
+  const { data: taskEntries } = await supabase
+    .from("bank_log_entries")
+    .select("client_id, content, created_at")
+    .eq("bank_name", "משימות לקוח")
+    .order("created_at", { ascending: false });
+
+  const lastTaskByClient: Record<string, string> = {};
+  (taskEntries ?? []).forEach((e) => {
+    if (!lastTaskByClient[e.client_id]) lastTaskByClient[e.client_id] = e.content;
+  });
+
   const active = (clients ?? []).filter((c: Client) => !c.archived_at);
   const archived = (clients ?? []).filter((c: Client) => !!c.archived_at);
   const displayed = isArchive ? archived : active;
@@ -66,7 +77,7 @@ export default async function Home({
         ) : (
           <div className="grid gap-4">
             {displayed.map((client: Client) => (
-              <ClientCard key={client.id} client={client} />
+              <ClientCard key={client.id} client={client} lastTask={lastTaskByClient[client.id]} />
             ))}
           </div>
         )}

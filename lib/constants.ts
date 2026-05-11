@@ -10,7 +10,15 @@ export const BANKS = [
 
 export type Bank = (typeof BANKS)[number];
 
+export const TASK_SECTION = "משימות לקוח";
+
 export const BANK_COLORS: Record<string, { border: string; titleColor: string; badgeBg: string; badgeColor: string }> = {
+  "משימות לקוח": {
+    border: "#a855f7",
+    titleColor: "#7e22ce",
+    badgeBg: "#faf5ff",
+    badgeColor: "#7e22ce",
+  },
   "מזרחי טפחות": {
     border: "#fb923c",
     titleColor: "#c2410c",

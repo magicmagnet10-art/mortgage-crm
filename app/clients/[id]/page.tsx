@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { BANKS } from "@/lib/constants";
+import { BANKS, TASK_SECTION } from "@/lib/constants";
 import { BankLogEntry } from "@/lib/types";
 import BankSection from "@/components/BankSection";
 import EditClientDialog from "@/components/EditClientDialog";
@@ -38,7 +38,7 @@ export default async function ClientPage({
     .order("created_at", { ascending: true });
 
   const entriesByBank: Record<string, BankLogEntry[]> = {};
-  BANKS.forEach((bank) => {
+  [TASK_SECTION, ...BANKS].forEach((bank) => {
     entriesByBank[bank] = (entries ?? []).filter((e) => e.bank_name === bank);
   });
 
@@ -113,6 +113,16 @@ export default async function ClientPage({
               </div>
             )}
           </div>
+        </div>
+
+        {/* Tasks */}
+        <div className="mb-4">
+          <BankSection
+            key={TASK_SECTION}
+            bank={TASK_SECTION}
+            clientId={id}
+            entries={entriesByBank[TASK_SECTION]}
+          />
         </div>
 
         {/* Banks */}

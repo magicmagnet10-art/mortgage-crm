@@ -68,7 +68,7 @@ export default function AddClientDialog() {
       <DialogTrigger>
         <Button>+ לקוח חדש</Button>
       </DialogTrigger>
-      <DialogContent dir="rtl" className="sm:max-w-md">
+      <DialogContent dir="rtl" className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>הוספת לקוח חדש</DialogTitle>
         </DialogHeader>

@@ -5,6 +5,10 @@ export interface Client {
   phone: string;
   mortgage_amount: number;
   property_value: number;
+  project_number: string | null;
+  residence: string | null;
+  equity: number | null;
+  payment: number | null;
   created_at: string;
 }
 

@@ -76,6 +76,34 @@ export default async function ClientPage({
                 {formatCurrency(client.property_value)}
               </p>
             </div>
+            {client.project_number && (
+              <div>
+                <p className="text-xs text-gray-400 mb-0.5">מספר פרויקט</p>
+                <p className="font-medium text-gray-800">{client.project_number}</p>
+              </div>
+            )}
+            {client.residence && (
+              <div>
+                <p className="text-xs text-gray-400 mb-0.5">מגורים</p>
+                <p className="font-medium text-gray-800">{client.residence}</p>
+              </div>
+            )}
+            {client.equity != null && (
+              <div>
+                <p className="text-xs text-gray-400 mb-0.5">הון עצמי</p>
+                <p className="font-medium text-gray-800">
+                  {formatCurrency(client.equity)}
+                </p>
+              </div>
+            )}
+            {client.payment != null && (
+              <div>
+                <p className="text-xs text-gray-400 mb-0.5">תשלום</p>
+                <p className="font-medium text-gray-800">
+                  {formatCurrency(client.payment)}
+                </p>
+              </div>
+            )}
           </div>
         </div>
 

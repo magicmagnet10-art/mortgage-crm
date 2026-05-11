@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
+import { BANK_COLORS } from "@/lib/constants";
 
 function formatDateTime(iso: string) {
   return new Date(iso).toLocaleString("he-IL", {
@@ -46,19 +47,32 @@ export default function BankSection({
     router.refresh();
   };
 
+  const colors = BANK_COLORS[bank] ?? {
+    border: "border-gray-200",
+    title: "text-gray-800",
+    badge: "bg-gray-50 text-gray-600",
+  };
+
   return (
-    <Card className="border border-gray-200">
+    <Card className={`border-2 ${colors.border}`}>
       <CardHeader
         className="cursor-pointer select-none py-4 px-5"
         onClick={() => setOpen((o) => !o)}
       >
         <div className="flex items-center justify-between">
-          <CardTitle className="text-base font-semibold text-gray-800">
-            {bank}
-          </CardTitle>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col gap-1 flex-1 min-w-0">
+            <CardTitle className={`text-base font-semibold ${colors.title}`}>
+              {bank}
+            </CardTitle>
+            {!open && entries.length > 0 && (
+              <p className="text-xs text-gray-500 truncate">
+                {entries[entries.length - 1].content}
+              </p>
+            )}
+          </div>
+          <div className="flex items-center gap-3 mr-3 shrink-0">
             {entries.length > 0 && (
-              <span className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full font-medium">
+              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${colors.badge}`}>
                 {entries.length} רשומות
               </span>
             )}

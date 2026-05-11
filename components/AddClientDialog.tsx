@@ -24,6 +24,10 @@ export default function AddClientDialog() {
     phone: "",
     mortgage_amount: "",
     property_value: "",
+    project_number: "",
+    residence: "",
+    equity: "",
+    payment: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -36,6 +40,10 @@ export default function AddClientDialog() {
       phone: form.phone,
       mortgage_amount: Number(form.mortgage_amount),
       property_value: Number(form.property_value),
+      project_number: form.project_number || null,
+      residence: form.residence || null,
+      equity: form.equity ? Number(form.equity) : null,
+      payment: form.payment ? Number(form.payment) : null,
     });
     setLoading(false);
     if (!error) {
@@ -46,6 +54,10 @@ export default function AddClientDialog() {
         phone: "",
         mortgage_amount: "",
         property_value: "",
+        project_number: "",
+        residence: "",
+        equity: "",
+        payment: "",
       });
       router.refresh();
     }
@@ -110,6 +122,42 @@ export default function AddClientDialog() {
               onChange={(e) =>
                 setForm({ ...form, property_value: e.target.value })
               }
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="project_number">מספר פרויקט</Label>
+            <Input
+              id="project_number"
+              value={form.project_number}
+              onChange={(e) =>
+                setForm({ ...form, project_number: e.target.value })
+              }
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="residence">מגורים</Label>
+            <Input
+              id="residence"
+              value={form.residence}
+              onChange={(e) => setForm({ ...form, residence: e.target.value })}
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="equity">הון עצמי (₪)</Label>
+            <Input
+              id="equity"
+              type="number"
+              value={form.equity}
+              onChange={(e) => setForm({ ...form, equity: e.target.value })}
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="payment">תשלום (₪)</Label>
+            <Input
+              id="payment"
+              type="number"
+              value={form.payment}
+              onChange={(e) => setForm({ ...form, payment: e.target.value })}
             />
           </div>
           <Button type="submit" disabled={loading} className="mt-2">

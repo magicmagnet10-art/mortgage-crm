@@ -21,10 +21,11 @@ export default function PushSubscriber() {
   useEffect(() => {
     if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
       setStatus("unsupported");
-      setDebug("PushManager לא נתמך בדפדפן זה");
       return;
     }
-    if (Notification.permission === "denied") {
+    if (Notification.permission === "granted") {
+      setStatus("granted");
+    } else if (Notification.permission === "denied") {
       setStatus("denied");
     }
   }, []);

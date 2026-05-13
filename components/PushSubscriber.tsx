@@ -15,76 +15,94 @@ function urlBase64ToUint8Array(base64String: string) {
 }
 
 export default function PushSubscriber() {
-  const [status, setStatus] = useState<"idle" | "granted" | "denied" | "unsupported" | "error">("idle");
-  const [errorMsg, setErrorMsg] = useState("");
+  const [status, setStatus] = useState<"idle" | "granted" | "denied" | "unsupported" | "loading">("idle");
+  const [debug, setDebug] = useState("");
 
   useEffect(() => {
     if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
       setStatus("unsupported");
+      setDebug("PushManager לא נתמך בדפדפן זה");
       return;
     }
-    if (Notification.permission === "granted") {
-      // Try to resubscribe silently if already granted
-      silentSubscribe();
-    } else if (Notification.permission === "denied") {
+    if (Notification.permission === "denied") {
       setStatus("denied");
     }
   }, []);
 
-  const silentSubscribe = async () => {
-    try {
-      const reg = await navigator.serviceWorker.register("/sw.js");
-      await navigator.serviceWorker.ready;
-      const existing = await reg.pushManager.getSubscription();
-      if (existing) { setStatus("granted"); return; }
-      await doSubscribe(reg);
-    } catch {}
-  };
-
-  const doSubscribe = async (reg: ServiceWorkerRegistration) => {
-    const key = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!;
-    const sub = await reg.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(key),
-    });
-    const res = await fetch("/api/push/subscribe", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(sub),
-    });
-    if (!res.ok) throw new Error("save failed");
-    setStatus("granted");
-  };
-
   const subscribe = async () => {
+    setStatus("loading");
+    setDebug("מתחיל רישום...");
     try {
+      setDebug("רושם Service Worker...");
       const reg = await navigator.serviceWorker.register("/sw.js");
+
+      setDebug("ממתין ל-SW...");
       await navigator.serviceWorker.ready;
+
+      setDebug("מבקש הרשאה...");
       const permission = await Notification.requestPermission();
-      if (permission !== "granted") { setStatus("denied"); return; }
-      await doSubscribe(reg);
+      if (permission !== "granted") {
+        setStatus("denied");
+        setDebug("הרשאה נדחתה: " + permission);
+        return;
+      }
+
+      setDebug("יוצר subscription...");
+      const key = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!;
+      const sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(key),
+      });
+
+      setDebug("שולח ל-server...");
+      const res = await fetch("/api/push/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(sub),
+      });
+
+      if (!res.ok) {
+        const txt = await res.text();
+        throw new Error("Server error: " + txt);
+      }
+
+      setStatus("granted");
+      setDebug("✅ הצליח!");
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
-      setErrorMsg(msg);
-      setStatus("error");
+      setStatus("idle");
+      setDebug("❌ שגיאה: " + msg);
     }
   };
 
-  if (status === "granted" || status === "unsupported") return null;
+  if (status === "unsupported") {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-4 text-sm text-red-700" dir="rtl">
+        ⚠️ {debug}
+      </div>
+    );
+  }
+
+  if (status === "granted" && !debug.startsWith("✅")) return null;
 
   return (
-    <div className="bg-purple-50 border border-purple-200 rounded-xl px-4 py-3 mb-4 flex items-center justify-between gap-4" dir="rtl">
-      <p className="text-sm text-purple-700">
-        {status === "denied"
-          ? "הרשאת התראות נדחתה — אפשר מהגדרות"
-          : status === "error"
-          ? `שגיאה: ${errorMsg}`
-          : "אפשר התראות לקבלת תזכורות משימות"}
-      </p>
-      {(status === "idle" || status === "error") && (
-        <Button size="sm" onClick={subscribe}>
-          אפשר התראות
-        </Button>
+    <div className="bg-purple-50 border border-purple-200 rounded-xl px-4 py-3 mb-4 flex flex-col gap-2" dir="rtl">
+      <div className="flex items-center justify-between gap-4">
+        <p className="text-sm text-purple-700">
+          {status === "denied"
+            ? "הרשאת התראות נדחתה — אפשר מהגדרות"
+            : status === "granted"
+            ? "✅ התראות מופעלות"
+            : "אפשר התראות לקבלת תזכורות משימות"}
+        </p>
+        {status !== "denied" && status !== "granted" && (
+          <Button size="sm" onClick={subscribe} disabled={status === "loading"}>
+            {status === "loading" ? "..." : "אפשר התראות"}
+          </Button>
+        )}
+      </div>
+      {debug && (
+        <p className="text-xs text-purple-500 font-mono">{debug}</p>
       )}
     </div>
   );

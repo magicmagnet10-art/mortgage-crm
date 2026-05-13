@@ -5,9 +5,10 @@ import { useRouter } from "next/navigation";
 import { BankLogEntry } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
-import { BANK_COLORS } from "@/lib/constants";
+import { BANK_COLORS, TASK_SECTION } from "@/lib/constants";
 
 function formatDateTime(iso: string) {
   return new Date(iso).toLocaleString("he-IL", {
@@ -30,8 +31,10 @@ export default function BankSection({
 }) {
   const router = useRouter();
   const [text, setText] = useState("");
+  const [remindAt, setRemindAt] = useState("");
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(entries.length > 0);
+  const isTask = bank === TASK_SECTION;
 
   const handleAdd = async () => {
     if (!text.trim()) return;
@@ -41,9 +44,11 @@ export default function BankSection({
       client_id: clientId,
       bank_name: bank,
       content: text.trim(),
+      ...(isTask && remindAt ? { remind_at: new Date(remindAt).toISOString() } : {}),
     });
     setLoading(false);
     setText("");
+    setRemindAt("");
     router.refresh();
   };
 
@@ -95,9 +100,16 @@ export default function BankSection({
                   key={entry.id}
                   className="bg-gray-50 border border-gray-100 rounded-lg p-3"
                 >
-                  <p className="text-xs text-gray-400 mb-1">
-                    {formatDateTime(entry.created_at)}
-                  </p>
+                  <div className="flex items-center justify-between mb-1">
+                    <p className="text-xs text-gray-400">
+                      {formatDateTime(entry.created_at)}
+                    </p>
+                    {isTask && entry.remind_at && (
+                      <p className="text-xs text-purple-500 font-medium">
+                        🔔 {formatDateTime(entry.remind_at)}
+                      </p>
+                    )}
+                  </div>
                   <p className="text-sm text-gray-800 whitespace-pre-wrap">
                     {entry.content}
                   </p>
@@ -105,18 +117,31 @@ export default function BankSection({
               ))}
             </div>
           ) : (
-            <p className="text-sm text-gray-400">אין רשומות עדיין לבנק זה.</p>
+            <p className="text-sm text-gray-400">
+              {isTask ? "אין משימות עדיין." : "אין רשומות עדיין לבנק זה."}
+            </p>
           )}
 
           {/* Add entry */}
           <div className="flex flex-col gap-2 pt-2 border-t border-gray-100">
             <Textarea
-              placeholder="הוסף רשומה חדשה..."
+              placeholder={isTask ? "הוסף משימה חדשה..." : "הוסף רשומה חדשה..."}
               value={text}
               onChange={(e) => setText(e.target.value)}
               rows={2}
               className="resize-none text-sm"
             />
+            {isTask && (
+              <div className="flex flex-col gap-1">
+                <label className="text-xs text-gray-500">תזכורת (אופציונלי)</label>
+                <Input
+                  type="datetime-local"
+                  value={remindAt}
+                  onChange={(e) => setRemindAt(e.target.value)}
+                  className="text-sm"
+                />
+              </div>
+            )}
             <Button
               size="sm"
               onClick={handleAdd}

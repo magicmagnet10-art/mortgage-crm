@@ -70,7 +70,14 @@ export default async function ClientPage({
             </div>
             <div>
               <p className="text-xs text-gray-400 mb-0.5">טלפון</p>
-              <p className="font-medium text-gray-800">{client.phone}</p>
+              <a
+                href={`https://wa.me/${client.phone.replace(/\D/g, "").replace(/^0/, "972")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-green-600 hover:underline flex items-center gap-1 w-fit"
+              >
+                📱 {client.phone}
+              </a>
             </div>
             <div>
               <p className="text-xs text-gray-400 mb-0.5">סכום משכנתא</p>

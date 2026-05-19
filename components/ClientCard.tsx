@@ -23,7 +23,15 @@ export default function ClientCard({ client, lastTask }: { client: Client; lastT
                 {client.full_name}
               </h2>
               <p className="text-sm text-gray-500">ת.ז: {client.id_number}</p>
-              <p className="text-sm text-gray-500">📞 {client.phone}</p>
+              <a
+                href={`https://wa.me/${client.phone.replace(/\D/g, "").replace(/^0/, "972")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="text-sm text-green-600 hover:underline flex items-center gap-1 w-fit"
+              >
+                <span>📱</span> {client.phone}
+              </a>
             </div>
             <div className="flex flex-col gap-1 text-left items-end">
               <p className="text-sm text-gray-700">

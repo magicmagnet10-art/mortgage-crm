@@ -66,7 +66,7 @@ export default function BankSection({
   return (
     <Card className="border-2" style={{ borderColor: colors.border }}>
       <CardHeader
-        className="cursor-pointer select-none py-4 px-5"
+        className="cursor-pointer select-none py-5 px-5 min-h-[56px]"
         onClick={() => { setOpen((o) => !o); if (open) setExpanded(false); }}
       >
         <div className="flex items-center justify-between">

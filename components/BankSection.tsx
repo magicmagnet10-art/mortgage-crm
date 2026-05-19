@@ -34,7 +34,11 @@ export default function BankSection({
   const [remindAt, setRemindAt] = useState("");
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(entries.length > 0);
+  const [expanded, setExpanded] = useState(false);
   const isTask = bank === TASK_SECTION;
+
+  const lastEntry = entries[entries.length - 1];
+  const olderEntries = entries.slice(0, -1);
 
   const handleAdd = async () => {
     if (!text.trim()) return;
@@ -63,7 +67,7 @@ export default function BankSection({
     <Card className="border-2" style={{ borderColor: colors.border }}>
       <CardHeader
         className="cursor-pointer select-none py-4 px-5"
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => { setOpen((o) => !o); if (open) setExpanded(false); }}
       >
         <div className="flex items-center justify-between">
           <div className="flex flex-col gap-1 flex-1 min-w-0">
@@ -72,7 +76,7 @@ export default function BankSection({
             </CardTitle>
             {!open && entries.length > 0 && (
               <p className="text-xs text-gray-500 truncate">
-                {entries[entries.length - 1].content}
+                {lastEntry.content}
               </p>
             )}
           </div>
@@ -92,29 +96,47 @@ export default function BankSection({
 
       {open && (
         <CardContent className="px-5 pb-5 pt-0 flex flex-col gap-4">
-          {/* Log entries */}
           {entries.length > 0 ? (
             <div className="flex flex-col gap-3">
-              {entries.map((entry) => (
+
+              {/* כפתור הרחב — רק אם יש יותר מרשומה אחת */}
+              {olderEntries.length > 0 && (
+                <button
+                  onClick={() => setExpanded((e) => !e)}
+                  className="text-xs text-blue-500 hover:underline self-start"
+                >
+                  {expanded ? "הסתר ישן ▲" : `הרחב — ${olderEntries.length} רשומות ישנות ▼`}
+                </button>
+              )}
+
+              {/* רשומות ישנות — מוסתרות כברירת מחדל */}
+              {expanded && olderEntries.map((entry) => (
                 <div
                   key={entry.id}
-                  className="bg-gray-50 border border-gray-100 rounded-lg p-3"
+                  className="bg-gray-50 border border-gray-100 rounded-lg p-3 opacity-70"
                 >
                   <div className="flex items-center justify-between mb-1">
-                    <p className="text-xs text-gray-400">
-                      {formatDateTime(entry.created_at)}
-                    </p>
+                    <p className="text-xs text-gray-400">{formatDateTime(entry.created_at)}</p>
                     {isTask && entry.remind_at && (
-                      <p className="text-xs text-purple-500 font-medium">
-                        🔔 {formatDateTime(entry.remind_at)}
-                      </p>
+                      <p className="text-xs text-purple-500 font-medium">🔔 {formatDateTime(entry.remind_at)}</p>
                     )}
                   </div>
-                  <p className="text-sm text-gray-800 whitespace-pre-wrap">
-                    {entry.content}
-                  </p>
+                  <p className="text-sm text-gray-700 whitespace-pre-wrap">{entry.content}</p>
                 </div>
               ))}
+
+              {/* הרשומה האחרונה — תמיד מוצגת */}
+              {lastEntry && (
+                <div className="bg-white border-2 rounded-lg p-3" style={{ borderColor: colors.border }}>
+                  <div className="flex items-center justify-between mb-1">
+                    <p className="text-xs text-gray-400">{formatDateTime(lastEntry.created_at)}</p>
+                    {isTask && lastEntry.remind_at && (
+                      <p className="text-xs text-purple-500 font-medium">🔔 {formatDateTime(lastEntry.remind_at)}</p>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-800 whitespace-pre-wrap font-medium">{lastEntry.content}</p>
+                </div>
+              )}
             </div>
           ) : (
             <p className="text-sm text-gray-400">
@@ -122,7 +144,7 @@ export default function BankSection({
             </p>
           )}
 
-          {/* Add entry */}
+          {/* הוספת רשומה */}
           <div className="flex flex-col gap-2 pt-2 border-t border-gray-100">
             <Textarea
               placeholder={isTask ? "הוסף משימה חדשה..." : "הוסף רשומה חדשה..."}

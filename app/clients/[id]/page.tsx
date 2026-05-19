@@ -47,7 +47,7 @@ export default async function ClientPage({
       <div className="max-w-5xl mx-auto">
         <Link
           href="/"
-          className="text-sm text-blue-600 hover:underline mb-6 inline-block"
+          className="inline-flex items-center gap-1 text-sm text-blue-600 hover:underline mb-6 py-3 px-1 min-h-[48px]"
         >
           ← חזרה לרשימה
         </Link>

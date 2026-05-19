@@ -24,18 +24,18 @@ export default function ClientCard({ client, lastTask }: { client: Client; lastT
           {/* אזור הניווט — שם + ת״ז */}
           <Link
             href={`/clients/${client.id}`}
-            className="flex flex-col justify-center gap-0.5 flex-1 min-w-0 px-5 py-4"
+            className="flex flex-col justify-center gap-0 flex-1 min-w-0 px-4 py-3"
           >
-            <span className="text-lg font-semibold text-blue-700 truncate">
+            <span className="text-base font-semibold text-blue-700 truncate">
               {client.full_name}
             </span>
-            <span className="text-sm text-gray-500">ת.ז: {client.id_number}</span>
+            <span className="text-xs text-gray-400">ת.ז: {client.id_number}</span>
           </Link>
 
           {/* כפתור הרחב — אזור לחיצה גדול */}
           <button
             onClick={() => setExpanded((e) => !e)}
-            className="flex items-center justify-center w-14 text-gray-400 text-base hover:text-gray-600 active:bg-gray-50 border-r border-gray-100 shrink-0"
+            className="flex items-center justify-center w-12 text-gray-400 text-sm hover:text-gray-600 active:bg-gray-50 border-r border-gray-100 shrink-0"
             aria-label={expanded ? "כווץ" : "הרחב"}
           >
             {expanded ? "▲" : "▼"}
@@ -93,7 +93,7 @@ export default function ClientCard({ client, lastTask }: { client: Client; lastT
 
         {/* משימה אחרונה */}
         {lastTask && (
-          <div className="px-5 py-3 border-t border-gray-100 flex items-start gap-2">
+          <div className="px-4 py-2 border-t border-gray-100 flex items-start gap-2">
             <span className="text-xs font-medium text-purple-600 shrink-0 mt-0.5">משימה:</span>
             <p className="text-xs text-gray-600 line-clamp-1">{lastTask}</p>
           </div>

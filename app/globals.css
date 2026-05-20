@@ -127,4 +127,9 @@
   html {
     @apply font-sans;
   }
+  /* מבטל את ה-300ms tap delay של iOS Safari על כל הכפתורים והלינקים */
+  a, button, [role="button"] {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
 }

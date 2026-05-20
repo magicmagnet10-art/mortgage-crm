@@ -63,33 +63,33 @@ export default async function Home({
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 mb-6 border-b border-gray-200">
+        <div className="flex gap-2 mb-6">
           <Link
             href="/"
-            className={`px-5 py-4 text-sm font-medium border-b-2 transition-colors min-h-[52px] flex items-center ${
+            className={`flex-1 text-center px-3 py-3 rounded-lg text-sm font-semibold transition-colors ${
               !isArchive && !isTasks
-                ? "border-blue-600 text-blue-600"
-                : "border-transparent text-gray-500 hover:text-gray-700"
+                ? "bg-blue-600 text-white shadow-sm"
+                : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"
             }`}
           >
             פעילים ({active.length})
           </Link>
           <Link
             href="/?tab=tasks"
-            className={`px-5 py-4 text-sm font-medium border-b-2 transition-colors min-h-[52px] flex items-center ${
+            className={`flex-1 text-center px-3 py-3 rounded-lg text-sm font-semibold transition-colors ${
               isTasks
-                ? "border-purple-600 text-purple-600"
-                : "border-transparent text-gray-500 hover:text-gray-700"
+                ? "bg-purple-600 text-white shadow-sm"
+                : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"
             }`}
           >
-            סטטוס בנקים ({clientsWithEntries.length})
+            סטטוס ({clientsWithEntries.length})
           </Link>
           <Link
             href="/?tab=archive"
-            className={`px-5 py-4 text-sm font-medium border-b-2 transition-colors min-h-[52px] flex items-center ${
+            className={`flex-1 text-center px-3 py-3 rounded-lg text-sm font-semibold transition-colors ${
               isArchive
-                ? "border-blue-600 text-blue-600"
-                : "border-transparent text-gray-500 hover:text-gray-700"
+                ? "bg-gray-700 text-white shadow-sm"
+                : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"
             }`}
           >
             ארכיון ({archived.length})

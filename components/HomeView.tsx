@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { Client } from "@/lib/types";
 import ClientCard from "@/components/ClientCard";
 import AddClientDialog from "@/components/AddClientDialog";
@@ -22,6 +23,12 @@ export default function HomeView({
   lastByClientBank: Record<string, Record<string, string>>;
 }) {
   const [tab, setTab] = useState<Tab>("active");
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await fetch("/api/auth/logout", { method: "POST" });
+    router.push("/login");
+  };
 
   const allSections = [TASK_SECTION, ...BANKS];
 
@@ -49,7 +56,15 @@ export default function HomeView({
               <p className="text-xs text-blue-100">{active.length} לקוחות פעילים</p>
             </div>
           </div>
-          {tab === "active" && <AddClientDialog />}
+          <div className="flex items-center gap-2">
+            {tab === "active" && <AddClientDialog />}
+            <button
+              onClick={handleLogout}
+              className="text-white/70 hover:text-white text-xs px-2 py-1.5 rounded-lg hover:bg-white/10 transition-colors"
+            >
+              יציאה
+            </button>
+          </div>
         </div>
 
         {/* Tabs inside header */}

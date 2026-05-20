@@ -148,7 +148,7 @@ export default function BankSection({
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(entries.length > 0);
   const [expanded, setExpanded] = useState(false);
-  const isTask = bank === TASK_SECTION;
+  const isTask = true; // כל הבנקים תומכים כעת במשימות ותזכורות
 
   const lastEntry = entries[entries.length - 1];
   const olderEntries = entries.slice(0, -1);

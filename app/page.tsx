@@ -171,7 +171,7 @@ export default async function Home({
           ) : (
             <div className="grid gap-2">
               {displayed.map((client: Client) => (
-                <ClientCard key={client.id} client={client} lastTask={lastTaskByClient[client.id]} />
+                <ClientCard key={client.id} client={client} lastByBank={lastByClientBank[client.id]} />
               ))}
             </div>
           )

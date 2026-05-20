@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Client } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
+import { BANK_COLORS, BANKS, TASK_SECTION } from "@/lib/constants";
 
 function formatCurrency(amount: number) {
   return new Intl.NumberFormat("he-IL", {
@@ -13,15 +14,24 @@ function formatCurrency(amount: number) {
   }).format(amount);
 }
 
-export default function ClientCard({ client, lastTask }: { client: Client; lastTask?: string }) {
+const ALL_SECTIONS = [TASK_SECTION, ...BANKS];
+
+export default function ClientCard({
+  client,
+  lastByBank,
+}: {
+  client: Client;
+  lastByBank?: Record<string, string>;
+}) {
   const [expanded, setExpanded] = useState(false);
+
+  const banksWithEntries = ALL_SECTIONS.filter((b) => lastByBank?.[b]);
 
   return (
     <Card className="border border-gray-200 transition-shadow hover:shadow-md">
       <CardContent className="p-0">
         {/* שורה ראשית */}
         <div className="flex items-stretch">
-          {/* אזור הניווט — שם + ת״ז */}
           <Link
             href={`/clients/${client.id}`}
             className="flex flex-col justify-center gap-0 flex-1 min-w-0 px-4 py-3"
@@ -32,7 +42,6 @@ export default function ClientCard({ client, lastTask }: { client: Client; lastT
             <span className="text-xs text-gray-400">ת.ז: {client.id_number}</span>
           </Link>
 
-          {/* כפתור הרחב — אזור לחיצה גדול */}
           <button
             onClick={() => setExpanded((e) => !e)}
             className="flex items-center justify-center w-12 text-gray-400 text-sm hover:text-gray-600 active:bg-gray-50 border-r border-gray-100 shrink-0"
@@ -44,7 +53,7 @@ export default function ClientCard({ client, lastTask }: { client: Client; lastT
 
         {/* פרטים מורחבים */}
         {expanded && (
-          <div className="px-5 pb-4 pt-2 border-t border-gray-100 flex flex-col gap-2">
+          <div className="px-4 pb-4 pt-2 border-t border-gray-100 flex flex-col gap-2">
             <a
               href={`https://wa.me/${client.phone.replace(/\D/g, "").replace(/^0/, "972")}`}
               target="_blank"
@@ -91,11 +100,25 @@ export default function ClientCard({ client, lastTask }: { client: Client; lastT
           </div>
         )}
 
-        {/* משימה אחרונה */}
-        {lastTask && (
-          <div className="px-4 py-2 border-t border-gray-100 flex items-start gap-2">
-            <span className="text-xs font-medium text-purple-600 shrink-0 mt-0.5">משימה:</span>
-            <p className="text-xs text-gray-600 line-clamp-1">{lastTask}</p>
+        {/* רשומה אחרונה לכל בנק */}
+        {banksWithEntries.length > 0 && (
+          <div className="border-t border-gray-100 divide-y divide-gray-50">
+            {banksWithEntries.map((bank) => {
+              const colors = BANK_COLORS[bank] ?? { titleColor: "#4b5563" };
+              return (
+                <div key={bank} className="px-4 py-2 flex items-start gap-2">
+                  <span
+                    className="text-xs font-semibold shrink-0 mt-0.5 min-w-[72px]"
+                    style={{ color: colors.titleColor }}
+                  >
+                    {bank}
+                  </span>
+                  <p className="text-xs text-gray-600 line-clamp-1 flex-1">
+                    {lastByBank![bank]}
+                  </p>
+                </div>
+              );
+            })}
           </div>
         )}
       </CardContent>

@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Client } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
-import { BANK_COLORS, BANKS, TASK_SECTION } from "@/lib/constants";
+import { BANK_COLORS } from "@/lib/constants";
 
 function formatCurrency(amount: number) {
   return new Intl.NumberFormat("he-IL", {
@@ -14,18 +14,14 @@ function formatCurrency(amount: number) {
   }).format(amount);
 }
 
-const ALL_SECTIONS = [TASK_SECTION, ...BANKS];
-
 export default function ClientCard({
   client,
-  lastByBank,
+  tasks = [],
 }: {
   client: Client;
-  lastByBank?: Record<string, string>;
+  tasks?: Array<{ bank_name: string; content: string }>;
 }) {
   const [expanded, setExpanded] = useState(false);
-
-  const banksWithEntries = ALL_SECTIONS.filter((b) => lastByBank?.[b]);
 
   return (
     <Card className="border border-gray-200 transition-shadow hover:shadow-md">
@@ -51,74 +47,74 @@ export default function ClientCard({
           </button>
         </div>
 
-        {/* פרטים מורחבים */}
+        {/* תוכן מורחב */}
         {expanded && (
-          <div className="px-4 pb-4 pt-2 border-t border-gray-100 flex flex-col gap-2">
-            <a
-              href={`https://wa.me/${client.phone.replace(/\D/g, "").replace(/^0/, "972")}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-green-600 hover:underline flex items-center gap-1 w-fit py-1"
-            >
-              📱 {client.phone}
-            </a>
-            <div className="grid grid-cols-2 gap-x-4 gap-y-1">
-              <p className="text-sm text-gray-700">
-                <span className="font-medium">משכנתא:</span>{" "}
-                {formatCurrency(client.mortgage_amount)}
-              </p>
-              <p className="text-sm text-gray-700">
-                <span className="font-medium">שווי נכס:</span>{" "}
-                {formatCurrency(client.property_value)}
-              </p>
-              {client.equity != null && (
-                <p className="text-sm text-gray-700">
-                  <span className="font-medium">הון עצמי:</span>{" "}
-                  {formatCurrency(client.equity)}
-                </p>
-              )}
-              {client.payment != null && (
-                <p className="text-sm text-gray-700">
-                  <span className="font-medium">תשלום:</span>{" "}
-                  {formatCurrency(client.payment)}
-                </p>
-              )}
-              {client.residence && (
-                <p className="text-sm text-gray-700">
-                  <span className="font-medium">מגורים:</span> {client.residence}
-                </p>
-              )}
-              {client.project_number && (
-                <p className="text-sm text-gray-700">
-                  <span className="font-medium">פרויקט:</span> {client.project_number}
-                </p>
-              )}
-            </div>
-            <p className="text-xs text-gray-400">
-              {new Date(client.created_at).toLocaleDateString("he-IL")}
-            </p>
-          </div>
-        )}
+          <div className="border-t border-gray-100">
+            {/* משימות */}
+            {tasks.length > 0 ? (
+              <div className="divide-y divide-gray-50">
+                {tasks.map((t, i) => {
+                  const colors = BANK_COLORS[t.bank_name] ?? { titleColor: "#4b5563" };
+                  return (
+                    <div key={i} className="px-4 py-2.5 flex items-start gap-2">
+                      <span
+                        className="text-xs font-semibold shrink-0 mt-0.5 min-w-[80px]"
+                        style={{ color: colors.titleColor }}
+                      >
+                        {t.bank_name}
+                      </span>
+                      <p className="text-xs text-gray-700 line-clamp-2 flex-1">{t.content}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="px-4 py-3 text-xs text-gray-400">אין משימות פתוחות</p>
+            )}
 
-        {/* רשומה אחרונה לכל בנק */}
-        {banksWithEntries.length > 0 && (
-          <div className="border-t border-gray-100 divide-y divide-gray-50">
-            {banksWithEntries.map((bank) => {
-              const colors = BANK_COLORS[bank] ?? { titleColor: "#4b5563" };
-              return (
-                <div key={bank} className="px-4 py-2 flex items-start gap-2">
-                  <span
-                    className="text-xs font-semibold shrink-0 mt-0.5 min-w-[72px]"
-                    style={{ color: colors.titleColor }}
-                  >
-                    {bank}
-                  </span>
-                  <p className="text-xs text-gray-600 line-clamp-1 flex-1">
-                    {lastByBank![bank]}
+            {/* פרטי לקוח */}
+            <div className="px-4 pb-3 pt-2 border-t border-gray-100 flex flex-col gap-1.5">
+              <a
+                href={`https://wa.me/${client.phone.replace(/\D/g, "").replace(/^0/, "972")}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-green-600 hover:underline flex items-center gap-1 w-fit"
+              >
+                📱 {client.phone}
+              </a>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                <p className="text-xs text-gray-600">
+                  <span className="font-medium">משכנתא:</span>{" "}
+                  {formatCurrency(client.mortgage_amount)}
+                </p>
+                <p className="text-xs text-gray-600">
+                  <span className="font-medium">שווי נכס:</span>{" "}
+                  {formatCurrency(client.property_value)}
+                </p>
+                {client.equity != null && (
+                  <p className="text-xs text-gray-600">
+                    <span className="font-medium">הון עצמי:</span>{" "}
+                    {formatCurrency(client.equity)}
                   </p>
-                </div>
-              );
-            })}
+                )}
+                {client.payment != null && (
+                  <p className="text-xs text-gray-600">
+                    <span className="font-medium">תשלום:</span>{" "}
+                    {formatCurrency(client.payment)}
+                  </p>
+                )}
+                {client.residence && (
+                  <p className="text-xs text-gray-600">
+                    <span className="font-medium">מגורים:</span> {client.residence}
+                  </p>
+                )}
+                {client.project_number && (
+                  <p className="text-xs text-gray-600">
+                    <span className="font-medium">פרויקט:</span> {client.project_number}
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
         )}
       </CardContent>

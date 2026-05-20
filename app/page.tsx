@@ -35,13 +35,11 @@ export default async function Home({
     }
   });
 
-  // מיפוי רק משימות (לכרטיס לקוח): clientId → bankName → תוכן אחרון
-  const lastTaskByClientBank: Record<string, Record<string, string>> = {};
+  // כל המשימות לכל לקוח (לכרטיס הרחב)
+  const tasksByClient: Record<string, Array<{ bank_name: string; content: string }>> = {};
   (allEntries ?? []).filter((e) => e.is_task).forEach((e) => {
-    if (!lastTaskByClientBank[e.client_id]) lastTaskByClientBank[e.client_id] = {};
-    if (!lastTaskByClientBank[e.client_id][e.bank_name]) {
-      lastTaskByClientBank[e.client_id][e.bank_name] = e.content;
-    }
+    if (!tasksByClient[e.client_id]) tasksByClient[e.client_id] = [];
+    tasksByClient[e.client_id].push({ bank_name: e.bank_name, content: e.content });
   });
 
   const active = (clients ?? []).filter((c: Client) => !c.archived_at);
@@ -172,7 +170,7 @@ export default async function Home({
           ) : (
             <div className="grid gap-2">
               {displayed.map((client: Client) => (
-                <ClientCard key={client.id} client={client} lastByBank={lastTaskByClientBank[client.id]} />
+                <ClientCard key={client.id} client={client} tasks={tasksByClient[client.id] ?? []} />
               ))}
             </div>
           )

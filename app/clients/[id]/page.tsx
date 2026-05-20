@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { BANKS, TASK_SECTION } from "@/lib/constants";
+import { BANKS, TASK_SECTION, BANK_COLORS } from "@/lib/constants";
 import { BankLogEntry } from "@/lib/types";
 import BankSection from "@/components/BankSection";
 import EditClientDialog from "@/components/EditClientDialog";
@@ -41,6 +41,9 @@ export default async function ClientPage({
   [TASK_SECTION, ...BANKS].forEach((bank) => {
     entriesByBank[bank] = (entries ?? []).filter((e) => e.bank_name === bank);
   });
+
+  // כל המשימות הפתוחות מכל הבנקים
+  const allTasks = (entries ?? []).filter((e) => e.is_task && !e.done_at);
 
   return (
     <main className="min-h-screen bg-gray-50 p-6" dir="rtl">
@@ -121,6 +124,29 @@ export default async function ClientPage({
             )}
           </div>
         </div>
+
+        {/* סיכום כל המשימות */}
+        {allTasks.length > 0 && (
+          <div className="bg-white rounded-xl border-2 border-purple-200 p-4 mb-4 shadow-sm">
+            <h2 className="text-sm font-semibold text-purple-700 mb-3">📋 משימות פתוחות</h2>
+            <div className="flex flex-col divide-y divide-gray-100">
+              {allTasks.map((task) => {
+                const colors = BANK_COLORS[task.bank_name] ?? { titleColor: "#4b5563" };
+                return (
+                  <div key={task.id} className="py-2 flex items-start gap-3">
+                    <span
+                      className="text-xs font-semibold shrink-0 mt-0.5 min-w-[90px]"
+                      style={{ color: colors.titleColor }}
+                    >
+                      {task.bank_name}
+                    </span>
+                    <p className="text-sm text-gray-700 flex-1">{task.content}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Tasks */}
         <div className="mb-4">

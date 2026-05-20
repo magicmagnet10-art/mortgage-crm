@@ -145,10 +145,10 @@ export default function BankSection({
   const router = useRouter();
   const [text, setText] = useState("");
   const [remindAt, setRemindAt] = useState("");
+  const [entryIsTask, setEntryIsTask] = useState(bank === TASK_SECTION);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(entries.length > 0);
   const [expanded, setExpanded] = useState(false);
-  const isTask = true; // כל הבנקים תומכים כעת במשימות ותזכורות
 
   const lastEntry = entries[entries.length - 1];
   const olderEntries = entries.slice(0, -1);
@@ -161,11 +161,13 @@ export default function BankSection({
       client_id: clientId,
       bank_name: bank,
       content: text.trim(),
-      ...(isTask && remindAt ? { remind_at: new Date(remindAt).toISOString() } : {}),
+      is_task: entryIsTask,
+      ...(entryIsTask && remindAt ? { remind_at: new Date(remindAt).toISOString() } : {}),
     });
     setLoading(false);
     setText("");
     setRemindAt("");
+    setEntryIsTask(bank === TASK_SECTION);
     router.refresh();
   };
 
@@ -178,21 +180,27 @@ export default function BankSection({
 
   function EntryCard({ entry, prominent }: { entry: BankLogEntry; prominent?: boolean }) {
     const isDone = !!entry.done_at;
+    const entryTask = entry.is_task;
     return (
       <div
         className={`rounded-lg p-3 ${prominent ? "bg-white border-2" : "bg-gray-50 border border-gray-100 opacity-70"} ${isDone ? "opacity-60" : ""}`}
         style={prominent ? { borderColor: colors.border } : {}}
       >
         <div className="flex items-center justify-between mb-1 gap-2">
-          <p className="text-xs text-gray-400">{formatDateTime(entry.created_at)}</p>
           <div className="flex items-center gap-2">
-            {isDone && (
-              <span className="text-xs text-green-600 font-medium">✓ בוצע</span>
+            <p className="text-xs text-gray-400">{formatDateTime(entry.created_at)}</p>
+            {entryTask && !isDone && (
+              <span className="text-xs font-medium px-1.5 py-0.5 rounded-full" style={{ backgroundColor: colors.badgeBg ?? "#f9fafb", color: colors.titleColor }}>
+                משימה
+              </span>
             )}
-            {isTask && entry.remind_at && !isDone && (
+          </div>
+          <div className="flex items-center gap-2">
+            {isDone && <span className="text-xs text-green-600 font-medium">✓ בוצע</span>}
+            {entryTask && entry.remind_at && !isDone && (
               <p className="text-xs text-purple-500 font-medium">🔔 {formatDateTime(entry.remind_at)}</p>
             )}
-            {isTask && entry.remind_at && isDone && (
+            {entryTask && entry.remind_at && isDone && (
               <p className="text-xs text-gray-400 line-through">🔔 {formatDateTime(entry.remind_at)}</p>
             )}
           </div>
@@ -200,7 +208,7 @@ export default function BankSection({
         <p className={`text-sm whitespace-pre-wrap ${prominent ? "text-gray-800 font-medium" : "text-gray-700"} ${isDone ? "line-through text-gray-400" : ""}`}>
           {entry.content}
         </p>
-        {isTask && (
+        {entryTask && (
           <TaskActions entry={entry} onRefresh={() => router.refresh()} />
         )}
       </div>
@@ -259,20 +267,37 @@ export default function BankSection({
             </div>
           ) : (
             <p className="text-sm text-gray-400">
-              {isTask ? "אין משימות עדיין." : "אין רשומות עדיין לבנק זה."}
+              {"אין רשומות עדיין."}
             </p>
           )}
 
           {/* הוספת רשומה */}
           <div className="flex flex-col gap-2 pt-2 border-t border-gray-100">
+            {/* toggle הערה / משימה */}
+            <div className="flex gap-1 self-start border border-gray-200 rounded-lg p-0.5 text-xs">
+              <button
+                onClick={() => { setEntryIsTask(false); setRemindAt(""); }}
+                className={`px-3 py-1.5 rounded-md transition-colors ${!entryIsTask ? "bg-gray-700 text-white font-medium" : "text-gray-500 hover:text-gray-700"}`}
+              >
+                הערה
+              </button>
+              <button
+                onClick={() => setEntryIsTask(true)}
+                className={`px-3 py-1.5 rounded-md transition-colors ${entryIsTask ? "font-medium text-white" : "text-gray-500 hover:text-gray-700"}`}
+                style={entryIsTask ? { backgroundColor: colors.titleColor } : {}}
+              >
+                משימה
+              </button>
+            </div>
+
             <Textarea
-              placeholder={isTask ? "הוסף משימה חדשה..." : "הוסף רשומה חדשה..."}
+              placeholder={entryIsTask ? "תוכן המשימה..." : "הוסף הערה..."}
               value={text}
               onChange={(e) => setText(e.target.value)}
               rows={2}
               className="resize-none text-sm"
             />
-            {isTask && (
+            {entryIsTask && (
               <div className="flex flex-col gap-1">
                 <label className="text-xs text-gray-500">תזכורת (אופציונלי)</label>
                 <Input
@@ -289,7 +314,7 @@ export default function BankSection({
               disabled={loading || !text.trim()}
               className="self-start"
             >
-              {loading ? "שומר..." : "הוסף"}
+              {loading ? "שומר..." : entryIsTask ? "הוסף משימה" : "הוסף הערה"}
             </Button>
           </div>
         </CardContent>

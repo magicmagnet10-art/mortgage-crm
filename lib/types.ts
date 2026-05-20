@@ -18,6 +18,7 @@ export interface BankLogEntry {
   client_id: string;
   bank_name: string;
   content: string;
+  is_task: boolean;
   remind_at: string | null;
   reminded_at: string | null;
   done_at: string | null;

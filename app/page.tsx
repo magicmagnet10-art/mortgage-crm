@@ -23,10 +23,10 @@ export default async function Home({
   // כל הרשומות — לוקחים את האחרונה לכל לקוח+בנק
   const { data: allEntries } = await supabase
     .from("bank_log_entries")
-    .select("client_id, bank_name, content, created_at")
+    .select("client_id, bank_name, content, created_at, is_task")
     .order("created_at", { ascending: false });
 
-  // מיפוי: clientId → bankName → תוכן אחרון
+  // מיפוי כולל (לטאב סטטוס): clientId → bankName → תוכן אחרון
   const lastByClientBank: Record<string, Record<string, string>> = {};
   (allEntries ?? []).forEach((e) => {
     if (!lastByClientBank[e.client_id]) lastByClientBank[e.client_id] = {};
@@ -35,13 +35,14 @@ export default async function Home({
     }
   });
 
-  // לכרטיסי לקוח — רק המשימה האחרונה
-  const lastTaskByClient: Record<string, string> = {};
-  (allEntries ?? [])
-    .filter((e) => e.bank_name === TASK_SECTION)
-    .forEach((e) => {
-      if (!lastTaskByClient[e.client_id]) lastTaskByClient[e.client_id] = e.content;
-    });
+  // מיפוי רק משימות (לכרטיס לקוח): clientId → bankName → תוכן אחרון
+  const lastTaskByClientBank: Record<string, Record<string, string>> = {};
+  (allEntries ?? []).filter((e) => e.is_task).forEach((e) => {
+    if (!lastTaskByClientBank[e.client_id]) lastTaskByClientBank[e.client_id] = {};
+    if (!lastTaskByClientBank[e.client_id][e.bank_name]) {
+      lastTaskByClientBank[e.client_id][e.bank_name] = e.content;
+    }
+  });
 
   const active = (clients ?? []).filter((c: Client) => !c.archived_at);
   const archived = (clients ?? []).filter((c: Client) => !!c.archived_at);
@@ -171,7 +172,7 @@ export default async function Home({
           ) : (
             <div className="grid gap-2">
               {displayed.map((client: Client) => (
-                <ClientCard key={client.id} client={client} lastByBank={lastByClientBank[client.id]} />
+                <ClientCard key={client.id} client={client} lastByBank={lastTaskByClientBank[client.id]} />
               ))}
             </div>
           )

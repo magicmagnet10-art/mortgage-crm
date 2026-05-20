@@ -31,41 +31,47 @@ export default function HomeView({
   const displayed = tab === "archive" ? archived : active;
 
   return (
-    <main className="min-h-screen bg-gray-50 p-6" dir="rtl">
-      <div className="max-w-5xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">CRM משכנתאות</h1>
+    <main className="min-h-screen bg-slate-50" dir="rtl">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-100 shadow-sm sticky top-0 z-10">
+        <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div>
+            <h1 className="text-xl font-bold text-gray-900">CRM משכנתאות</h1>
+            <p className="text-xs text-gray-400 mt-0.5">{active.length} לקוחות פעילים</p>
+          </div>
           {tab === "active" && <AddClientDialog />}
         </div>
+      </div>
 
+      <div className="max-w-2xl mx-auto px-4 py-5">
         {/* Tabs */}
-        <div className="flex gap-2 mb-6">
+        <div className="flex gap-2 mb-5 bg-gray-100 p-1 rounded-xl">
           <button
             onClick={() => setTab("active")}
-            className={`flex-1 px-3 py-3 rounded-lg text-sm font-semibold transition-colors ${
+            className={`flex-1 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all ${
               tab === "active"
-                ? "bg-blue-600 text-white shadow-sm"
-                : "bg-white text-gray-600 border border-gray-200"
+                ? "bg-white text-blue-600 shadow-sm"
+                : "text-gray-500"
             }`}
           >
             פעילים ({active.length})
           </button>
           <button
             onClick={() => setTab("status")}
-            className={`flex-1 px-3 py-3 rounded-lg text-sm font-semibold transition-colors ${
+            className={`flex-1 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all ${
               tab === "status"
-                ? "bg-purple-600 text-white shadow-sm"
-                : "bg-white text-gray-600 border border-gray-200"
+                ? "bg-white text-purple-600 shadow-sm"
+                : "text-gray-500"
             }`}
           >
             סטטוס ({clientsWithEntries.length})
           </button>
           <button
             onClick={() => setTab("archive")}
-            className={`flex-1 px-3 py-3 rounded-lg text-sm font-semibold transition-colors ${
+            className={`flex-1 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all ${
               tab === "archive"
-                ? "bg-gray-700 text-white shadow-sm"
-                : "bg-white text-gray-600 border border-gray-200"
+                ? "bg-white text-gray-700 shadow-sm"
+                : "text-gray-500"
             }`}
           >
             ארכיון ({archived.length})
@@ -74,7 +80,7 @@ export default function HomeView({
 
         {/* Status tab */}
         {tab === "status" && (
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-3">
             {clientsWithEntries.length === 0 ? (
               <div className="text-center py-24 text-gray-400">
                 <p className="text-xl">אין רשומות עדיין</p>
@@ -88,13 +94,13 @@ export default function HomeView({
                 return (
                   <div
                     key={client.id}
-                    className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm"
+                    className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden"
                   >
                     <Link
                       href={`/clients/${client.id}`}
-                      className="block px-5 py-3 bg-gray-50 border-b border-gray-100 hover:bg-gray-100 transition-colors"
+                      className="block px-4 py-3 border-b border-gray-50 hover:bg-gray-50 transition-colors"
                     >
-                      <span className="font-semibold text-blue-700 text-base">
+                      <span className="font-bold text-blue-700 text-base">
                         {client.full_name}
                       </span>
                     </Link>
@@ -102,14 +108,14 @@ export default function HomeView({
                       {clientBanks.map((bank) => {
                         const colors = BANK_COLORS[bank] ?? { titleColor: "#4b5563" };
                         return (
-                          <div key={bank} className="px-5 py-3 flex items-start gap-3">
+                          <div key={bank} className="px-4 py-2.5 flex items-start gap-3">
                             <span
-                              className="text-xs font-semibold shrink-0 mt-0.5 min-w-[90px]"
+                              className="text-xs font-bold shrink-0 mt-0.5 min-w-[85px]"
                               style={{ color: colors.titleColor }}
                             >
                               {bank}
                             </span>
-                            <p className="text-sm text-gray-600 line-clamp-1 flex-1">
+                            <p className="text-sm text-gray-500 line-clamp-1 flex-1">
                               {lastByClientBank[client.id][bank]}
                             </p>
                           </div>
@@ -135,7 +141,7 @@ export default function HomeView({
               )}
             </div>
           ) : (
-            <div className="grid gap-2">
+            <div className="grid gap-2.5">
               {displayed.map((client) => (
                 <ClientCard
                   key={client.id}

@@ -46,21 +46,25 @@ export default async function ClientPage({
   const allTasks = (entries ?? []).filter((e) => e.is_task && !e.done_at);
 
   return (
-    <main className="min-h-screen bg-gray-50 p-6" dir="rtl">
-      <div className="max-w-5xl mx-auto">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 mb-6 px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 shadow-sm"
-        >
-          ← חזרה לרשימה
-        </Link>
+    <main className="min-h-screen bg-slate-50" dir="rtl">
+      {/* Top bar */}
+      <div className="bg-white border-b border-gray-100 shadow-sm sticky top-0 z-10">
+        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-semibold text-gray-700 transition-colors"
+          >
+            ← חזרה
+          </Link>
+          <h1 className="text-base font-bold text-gray-900 truncate">{client.full_name}</h1>
+        </div>
+      </div>
 
+      <div className="max-w-2xl mx-auto px-4 py-5">
         {/* Client Header */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6 shadow-sm">
+        <div className="bg-white rounded-2xl border border-gray-100 p-5 mb-4 shadow-sm">
           <div className="flex items-start justify-between mb-4">
-            <h1 className="text-2xl font-bold text-gray-900">
-              {client.full_name}
-            </h1>
+            <div />
             <div className="flex gap-2">
               <EditClientDialog client={client} />
               <ArchiveButton clientId={client.id} isArchived={!!client.archived_at} />
@@ -159,10 +163,10 @@ export default async function ClientPage({
         </div>
 
         {/* Banks */}
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">
+        <h2 className="text-base font-bold text-gray-500 mb-3 px-1">
           משא ומתן מול בנקים
         </h2>
-        <div className="grid gap-4">
+        <div className="grid gap-3">
           {BANKS.map((bank) => (
             <BankSection
               key={bank}
@@ -175,4 +179,5 @@ export default async function ClientPage({
       </div>
     </main>
   );
+
 }

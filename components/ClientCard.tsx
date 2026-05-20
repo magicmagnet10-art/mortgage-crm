@@ -24,7 +24,7 @@ export default function ClientCard({
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <Card className="border border-gray-200 transition-shadow hover:shadow-md">
+    <Card className="border border-gray-100 rounded-2xl transition-all hover:shadow-md shadow-sm overflow-hidden">
       <CardContent className="p-0">
         {/* שורה ראשית */}
         <div className="flex items-stretch">

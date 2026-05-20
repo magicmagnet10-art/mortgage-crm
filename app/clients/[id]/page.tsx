@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { BANKS, TASK_SECTION, BANK_COLORS } from "@/lib/constants";
 import { BankLogEntry } from "@/lib/types";
 import BankSection from "@/components/BankSection";
@@ -49,14 +50,15 @@ export default async function ClientPage({
     <main className="min-h-screen bg-slate-50" dir="rtl">
       {/* Top bar */}
       <div className="sticky top-0 z-10" style={{ background: "linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)" }}>
-        <div className="max-w-2xl mx-auto px-4 py-4 flex items-center gap-3">
+        <div className="max-w-2xl mx-auto px-4 py-3 flex items-center gap-3">
           <Link
             href="/"
-            className="inline-flex items-center gap-1 px-3 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-semibold text-white transition-colors"
+            className="inline-flex items-center gap-1 px-3 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-semibold text-white transition-colors shrink-0"
           >
             ← חזרה
           </Link>
-          <h1 className="text-base font-black text-white truncate">{client.full_name}</h1>
+          <Image src="/logo.png" alt="NSC" width={36} height={36} className="rounded-full shrink-0" />
+          <h1 className="text-sm font-black text-white truncate">{client.full_name}</h1>
         </div>
       </div>
 

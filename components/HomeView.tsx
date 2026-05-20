@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Client } from "@/lib/types";
 import ClientCard from "@/components/ClientCard";
 import AddClientDialog from "@/components/AddClientDialog";
@@ -36,12 +37,15 @@ export default function HomeView({
       <div className="sticky top-0 z-10" style={{ background: "linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)" }}>
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            {/* מקום ללוגו — יוחלף כשהלוגו יועלה */}
-            <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center text-white font-black text-lg">
-              מ
-            </div>
+            <Image
+              src="/logo.png"
+              alt="NSC לוגו"
+              width={44}
+              height={44}
+              className="rounded-full shadow-md"
+            />
             <div>
-              <h1 className="text-lg font-black text-white tracking-tight">CRM משכנתאות</h1>
+              <h1 className="text-base font-black text-white tracking-tight">נריה כהן | יועץ משכנתאות</h1>
               <p className="text-xs text-blue-100">{active.length} לקוחות פעילים</p>
             </div>
           </div>

@@ -30,17 +30,24 @@ export default function ClientCard({
         <div className="flex items-stretch">
           <Link
             href={`/clients/${client.id}`}
-            className="flex flex-col justify-center gap-0 flex-1 min-w-0 px-4 py-3"
+            className="flex items-center gap-3 flex-1 min-w-0 px-4 py-3.5"
           >
-            <span className="text-base font-semibold text-blue-700 truncate">
-              {client.full_name}
-            </span>
-            <span className="text-xs text-gray-400">ת.ז: {client.id_number}</span>
+            <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+              <span className="text-sm font-black text-blue-600">
+                {client.full_name.charAt(0)}
+              </span>
+            </div>
+            <div className="min-w-0">
+              <span className="text-sm font-bold text-gray-900 truncate block">
+                {client.full_name}
+              </span>
+              <span className="text-xs text-gray-400">ת.ז: {client.id_number}</span>
+            </div>
           </Link>
 
           <button
             onClick={() => setExpanded((e) => !e)}
-            className="flex items-center justify-center w-12 text-gray-400 text-sm hover:text-gray-600 active:bg-gray-50 border-r border-gray-100 shrink-0"
+            className="flex items-center justify-center w-11 text-gray-300 text-sm hover:text-gray-500 active:bg-gray-50 shrink-0"
             aria-label={expanded ? "כווץ" : "הרחב"}
           >
             {expanded ? "▲" : "▼"}

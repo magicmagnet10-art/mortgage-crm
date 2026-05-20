@@ -33,50 +33,59 @@ export default function HomeView({
   return (
     <main className="min-h-screen bg-slate-50" dir="rtl">
       {/* Header */}
-      <div className="bg-white border-b border-gray-100 shadow-sm sticky top-0 z-10">
+      <div className="sticky top-0 z-10" style={{ background: "linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)" }}>
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-bold text-gray-900">CRM משכנתאות</h1>
-            <p className="text-xs text-gray-400 mt-0.5">{active.length} לקוחות פעילים</p>
+          <div className="flex items-center gap-3">
+            {/* מקום ללוגו — יוחלף כשהלוגו יועלה */}
+            <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center text-white font-black text-lg">
+              מ
+            </div>
+            <div>
+              <h1 className="text-lg font-black text-white tracking-tight">CRM משכנתאות</h1>
+              <p className="text-xs text-blue-100">{active.length} לקוחות פעילים</p>
+            </div>
           </div>
           {tab === "active" && <AddClientDialog />}
+        </div>
+
+        {/* Tabs inside header */}
+        <div className="max-w-2xl mx-auto px-4 pb-3">
+          <div className="flex gap-1.5 bg-white/15 p-1 rounded-xl">
+            <button
+              onClick={() => setTab("active")}
+              className={`flex-1 px-2 py-2 rounded-lg text-sm font-semibold transition-all ${
+                tab === "active"
+                  ? "bg-white text-blue-600 shadow"
+                  : "text-white/80 hover:text-white hover:bg-white/10"
+              }`}
+            >
+              פעילים ({active.length})
+            </button>
+            <button
+              onClick={() => setTab("status")}
+              className={`flex-1 px-2 py-2 rounded-lg text-sm font-semibold transition-all ${
+                tab === "status"
+                  ? "bg-white text-purple-600 shadow"
+                  : "text-white/80 hover:text-white hover:bg-white/10"
+              }`}
+            >
+              סטטוס ({clientsWithEntries.length})
+            </button>
+            <button
+              onClick={() => setTab("archive")}
+              className={`flex-1 px-2 py-2 rounded-lg text-sm font-semibold transition-all ${
+                tab === "archive"
+                  ? "bg-white text-gray-700 shadow"
+                  : "text-white/80 hover:text-white hover:bg-white/10"
+              }`}
+            >
+              ארכיון ({archived.length})
+            </button>
+          </div>
         </div>
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-5">
-        {/* Tabs */}
-        <div className="flex gap-2 mb-5 bg-gray-100 p-1 rounded-xl">
-          <button
-            onClick={() => setTab("active")}
-            className={`flex-1 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all ${
-              tab === "active"
-                ? "bg-white text-blue-600 shadow-sm"
-                : "text-gray-500"
-            }`}
-          >
-            פעילים ({active.length})
-          </button>
-          <button
-            onClick={() => setTab("status")}
-            className={`flex-1 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all ${
-              tab === "status"
-                ? "bg-white text-purple-600 shadow-sm"
-                : "text-gray-500"
-            }`}
-          >
-            סטטוס ({clientsWithEntries.length})
-          </button>
-          <button
-            onClick={() => setTab("archive")}
-            className={`flex-1 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all ${
-              tab === "archive"
-                ? "bg-white text-gray-700 shadow-sm"
-                : "text-gray-500"
-            }`}
-          >
-            ארכיון ({archived.length})
-          </button>
-        </div>
 
         {/* Status tab */}
         {tab === "status" && (

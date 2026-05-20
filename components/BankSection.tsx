@@ -20,6 +20,119 @@ function formatDateTime(iso: string) {
   });
 }
 
+function TaskActions({ entry, onRefresh }: { entry: BankLogEntry; onRefresh: () => void }) {
+  const [postponeMode, setPostponeMode] = useState(false);
+  const [newDate, setNewDate] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleDone = async () => {
+    setLoading(true);
+    const supabase = createClient();
+    await supabase
+      .from("bank_log_entries")
+      .update({ done_at: new Date().toISOString() })
+      .eq("id", entry.id);
+    setLoading(false);
+    onRefresh();
+  };
+
+  const handleUndone = async () => {
+    setLoading(true);
+    const supabase = createClient();
+    await supabase
+      .from("bank_log_entries")
+      .update({ done_at: null })
+      .eq("id", entry.id);
+    setLoading(false);
+    onRefresh();
+  };
+
+  const handleDelete = async () => {
+    if (!confirm("למחוק את המשימה?")) return;
+    setLoading(true);
+    const supabase = createClient();
+    await supabase.from("bank_log_entries").delete().eq("id", entry.id);
+    setLoading(false);
+    onRefresh();
+  };
+
+  const handlePostpone = async () => {
+    if (!newDate) return;
+    setLoading(true);
+    const supabase = createClient();
+    await supabase
+      .from("bank_log_entries")
+      .update({ remind_at: new Date(newDate).toISOString(), reminded_at: null })
+      .eq("id", entry.id);
+    setLoading(false);
+    setPostponeMode(false);
+    setNewDate("");
+    onRefresh();
+  };
+
+  if (loading) return <p className="text-xs text-gray-400 mt-1">שומר...</p>;
+
+  return (
+    <div className="mt-2 flex flex-col gap-1">
+      {!postponeMode ? (
+        <div className="flex gap-2 flex-wrap">
+          {entry.done_at ? (
+            <button
+              onClick={handleUndone}
+              className="text-xs px-2 py-1 rounded-md bg-gray-100 text-gray-500 hover:bg-gray-200"
+            >
+              ↩ בטל בוצע
+            </button>
+          ) : (
+            <button
+              onClick={handleDone}
+              className="text-xs px-2 py-1 rounded-md bg-green-50 text-green-700 hover:bg-green-100 font-medium"
+            >
+              ✓ בוצע
+            </button>
+          )}
+          {!entry.done_at && (
+            <button
+              onClick={() => setPostponeMode(true)}
+              className="text-xs px-2 py-1 rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100"
+            >
+              📅 דחה
+            </button>
+          )}
+          <button
+            onClick={handleDelete}
+            className="text-xs px-2 py-1 rounded-md bg-red-50 text-red-600 hover:bg-red-100"
+          >
+            🗑 מחק
+          </button>
+        </div>
+      ) : (
+        <div className="flex items-center gap-2 flex-wrap">
+          <Input
+            type="datetime-local"
+            value={newDate}
+            onChange={(e) => setNewDate(e.target.value)}
+            className="text-xs h-8 w-48"
+          />
+          <button
+            onClick={handlePostpone}
+            disabled={!newDate}
+            className="text-xs px-2 py-1 rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-40"
+          >
+            אשר דחייה
+          </button>
+          <button
+            onClick={() => { setPostponeMode(false); setNewDate(""); }}
+            className="text-xs px-2 py-1 rounded-md bg-gray-100 text-gray-500 hover:bg-gray-200"
+          >
+            ביטול
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function BankSection({
   bank,
   clientId,
@@ -63,6 +176,37 @@ export default function BankSection({
     badgeColor: "#4b5563",
   };
 
+  function EntryCard({ entry, prominent }: { entry: BankLogEntry; prominent?: boolean }) {
+    const isDone = !!entry.done_at;
+    return (
+      <div
+        className={`rounded-lg p-3 ${prominent ? "bg-white border-2" : "bg-gray-50 border border-gray-100 opacity-70"} ${isDone ? "opacity-60" : ""}`}
+        style={prominent ? { borderColor: colors.border } : {}}
+      >
+        <div className="flex items-center justify-between mb-1 gap-2">
+          <p className="text-xs text-gray-400">{formatDateTime(entry.created_at)}</p>
+          <div className="flex items-center gap-2">
+            {isDone && (
+              <span className="text-xs text-green-600 font-medium">✓ בוצע</span>
+            )}
+            {isTask && entry.remind_at && !isDone && (
+              <p className="text-xs text-purple-500 font-medium">🔔 {formatDateTime(entry.remind_at)}</p>
+            )}
+            {isTask && entry.remind_at && isDone && (
+              <p className="text-xs text-gray-400 line-through">🔔 {formatDateTime(entry.remind_at)}</p>
+            )}
+          </div>
+        </div>
+        <p className={`text-sm whitespace-pre-wrap ${prominent ? "text-gray-800 font-medium" : "text-gray-700"} ${isDone ? "line-through text-gray-400" : ""}`}>
+          {entry.content}
+        </p>
+        {isTask && (
+          <TaskActions entry={entry} onRefresh={() => router.refresh()} />
+        )}
+      </div>
+    );
+  }
+
   return (
     <Card className="border-2" style={{ borderColor: colors.border }}>
       <CardHeader
@@ -98,8 +242,6 @@ export default function BankSection({
         <CardContent className="px-5 pb-5 pt-0 flex flex-col gap-4">
           {entries.length > 0 ? (
             <div className="flex flex-col gap-3">
-
-              {/* כפתור הרחב — רק אם יש יותר מרשומה אחת */}
               {olderEntries.length > 0 && (
                 <button
                   onClick={() => setExpanded((e) => !e)}
@@ -109,34 +251,11 @@ export default function BankSection({
                 </button>
               )}
 
-              {/* רשומות ישנות — מוסתרות כברירת מחדל */}
               {expanded && olderEntries.map((entry) => (
-                <div
-                  key={entry.id}
-                  className="bg-gray-50 border border-gray-100 rounded-lg p-3 opacity-70"
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <p className="text-xs text-gray-400">{formatDateTime(entry.created_at)}</p>
-                    {isTask && entry.remind_at && (
-                      <p className="text-xs text-purple-500 font-medium">🔔 {formatDateTime(entry.remind_at)}</p>
-                    )}
-                  </div>
-                  <p className="text-sm text-gray-700 whitespace-pre-wrap">{entry.content}</p>
-                </div>
+                <EntryCard key={entry.id} entry={entry} prominent={false} />
               ))}
 
-              {/* הרשומה האחרונה — תמיד מוצגת */}
-              {lastEntry && (
-                <div className="bg-white border-2 rounded-lg p-3" style={{ borderColor: colors.border }}>
-                  <div className="flex items-center justify-between mb-1">
-                    <p className="text-xs text-gray-400">{formatDateTime(lastEntry.created_at)}</p>
-                    {isTask && lastEntry.remind_at && (
-                      <p className="text-xs text-purple-500 font-medium">🔔 {formatDateTime(lastEntry.remind_at)}</p>
-                    )}
-                  </div>
-                  <p className="text-sm text-gray-800 whitespace-pre-wrap font-medium">{lastEntry.content}</p>
-                </div>
-              )}
+              {lastEntry && <EntryCard entry={lastEntry} prominent />}
             </div>
           ) : (
             <p className="text-sm text-gray-400">

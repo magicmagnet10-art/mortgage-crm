@@ -20,5 +20,6 @@ export interface BankLogEntry {
   content: string;
   remind_at: string | null;
   reminded_at: string | null;
+  done_at: string | null;
   created_at: string;
 }

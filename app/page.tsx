@@ -3,6 +3,7 @@ import { Client } from "@/lib/types";
 import ClientCard from "@/components/ClientCard";
 import AddClientDialog from "@/components/AddClientDialog";
 import Link from "next/link";
+import { BANKS, TASK_SECTION, BANK_COLORS } from "@/lib/constants";
 
 export default async function Home({
   searchParams,
@@ -19,27 +20,40 @@ export default async function Home({
     .select("*")
     .order("created_at", { ascending: false });
 
-  const { data: taskEntries } = await supabase
+  // כל הרשומות — לוקחים את האחרונה לכל לקוח+בנק
+  const { data: allEntries } = await supabase
     .from("bank_log_entries")
-    .select("client_id, content, created_at")
-    .eq("bank_name", "משימות לקוח")
+    .select("client_id, bank_name, content, created_at")
     .order("created_at", { ascending: false });
 
-  const lastTaskByClient: Record<string, string> = {};
-  (taskEntries ?? []).forEach((e) => {
-    if (!lastTaskByClient[e.client_id]) lastTaskByClient[e.client_id] = e.content;
+  // מיפוי: clientId → bankName → תוכן אחרון
+  const lastByClientBank: Record<string, Record<string, string>> = {};
+  (allEntries ?? []).forEach((e) => {
+    if (!lastByClientBank[e.client_id]) lastByClientBank[e.client_id] = {};
+    if (!lastByClientBank[e.client_id][e.bank_name]) {
+      lastByClientBank[e.client_id][e.bank_name] = e.content;
+    }
   });
+
+  // לכרטיסי לקוח — רק המשימה האחרונה
+  const lastTaskByClient: Record<string, string> = {};
+  (allEntries ?? [])
+    .filter((e) => e.bank_name === TASK_SECTION)
+    .forEach((e) => {
+      if (!lastTaskByClient[e.client_id]) lastTaskByClient[e.client_id] = e.content;
+    });
 
   const active = (clients ?? []).filter((c: Client) => !c.archived_at);
   const archived = (clients ?? []).filter((c: Client) => !!c.archived_at);
   const displayed = isArchive ? archived : active;
 
-  const clientById: Record<string, Client> = {};
-  (clients ?? []).forEach((c: Client) => { clientById[c.id] = c; });
+  // לקוחות שיש להם לפחות רשומה אחת בכלשהו
+  const clientsWithEntries = active.filter(
+    (c: Client) =>
+      lastByClientBank[c.id] && Object.keys(lastByClientBank[c.id]).length > 0
+  );
 
-  const tasksWithClient = active
-    .filter((c: Client) => lastTaskByClient[c.id])
-    .map((c: Client) => ({ client: c, task: lastTaskByClient[c.id] }));
+  const allSections = [TASK_SECTION, ...BANKS];
 
   return (
     <main className="min-h-screen bg-gray-50 p-6" dir="rtl">
@@ -69,7 +83,7 @@ export default async function Home({
                 : "border-transparent text-gray-500 hover:text-gray-700"
             }`}
           >
-            משימות ({tasksWithClient.length})
+            סטטוס בנקים ({clientsWithEntries.length})
           </Link>
           <Link
             href="/?tab=archive"
@@ -83,24 +97,62 @@ export default async function Home({
           </Link>
         </div>
 
-        {/* Tasks tab */}
+        {/* Tasks/Status tab */}
         {isTasks && (
-          <div className="flex flex-col gap-3">
-            {tasksWithClient.length === 0 ? (
+          <div className="flex flex-col gap-4">
+            {clientsWithEntries.length === 0 ? (
               <div className="text-center py-24 text-gray-400">
-                <p className="text-xl">אין משימות פתוחות</p>
-                <p className="text-sm mt-2">הוסף משימה בכרטיס לקוח</p>
+                <p className="text-xl">אין רשומות עדיין</p>
+                <p className="text-sm mt-2">הוסף רשומות בכרטיס לקוח</p>
               </div>
             ) : (
-              tasksWithClient.map(({ client, task }) => (
-                <Link key={client.id} href={`/clients/${client.id}`}>
-                  <div className="bg-white border border-purple-200 rounded-xl px-5 py-4 hover:shadow-md transition-shadow flex items-center justify-between gap-4">
-                    <span className="font-semibold text-gray-800 shrink-0">{client.full_name}</span>
-                    <span className="text-gray-400 shrink-0">—</span>
-                    <span className="text-gray-600 text-sm flex-1 line-clamp-1">{task}</span>
+              clientsWithEntries.map((client: Client) => {
+                const clientBanks = allSections.filter(
+                  (bank) => lastByClientBank[client.id]?.[bank]
+                );
+                return (
+                  <div
+                    key={client.id}
+                    className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm"
+                  >
+                    {/* שם לקוח */}
+                    <Link
+                      href={`/clients/${client.id}`}
+                      className="block px-5 py-3 bg-gray-50 border-b border-gray-100 hover:bg-gray-100 transition-colors"
+                    >
+                      <span className="font-semibold text-blue-700 text-base">
+                        {client.full_name}
+                      </span>
+                    </Link>
+
+                    {/* רשומות לפי בנק */}
+                    <div className="divide-y divide-gray-50">
+                      {clientBanks.map((bank) => {
+                        const colors = BANK_COLORS[bank] ?? {
+                          titleColor: "#4b5563",
+                          border: "#d1d5db",
+                        };
+                        return (
+                          <div
+                            key={bank}
+                            className="px-5 py-3 flex items-start gap-3"
+                          >
+                            <span
+                              className="text-xs font-semibold shrink-0 mt-0.5 min-w-[90px]"
+                              style={{ color: colors.titleColor }}
+                            >
+                              {bank}
+                            </span>
+                            <p className="text-sm text-gray-600 line-clamp-1 flex-1">
+                              {lastByClientBank[client.id][bank]}
+                            </p>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
-                </Link>
-              ))
+                );
+              })
             )}
           </div>
         )}

@@ -28,6 +28,7 @@ export default function AddClientDialog() {
     residence: "",
     equity: "",
     payment: "",
+    next_payment_date: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -44,6 +45,7 @@ export default function AddClientDialog() {
       residence: form.residence || null,
       equity: form.equity ? Number(form.equity) : null,
       payment: form.payment ? Number(form.payment) : null,
+      next_payment_date: form.next_payment_date || null,
     });
     setLoading(false);
     if (!error) {
@@ -58,6 +60,7 @@ export default function AddClientDialog() {
         residence: "",
         equity: "",
         payment: "",
+        next_payment_date: "",
       });
       router.refresh();
     }
@@ -158,6 +161,15 @@ export default function AddClientDialog() {
               type="number"
               value={form.payment}
               onChange={(e) => setForm({ ...form, payment: e.target.value })}
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="next_payment_date">תאריך תשלום קרוב</Label>
+            <Input
+              id="next_payment_date"
+              type="date"
+              value={form.next_payment_date}
+              onChange={(e) => setForm({ ...form, next_payment_date: e.target.value })}
             />
           </div>
           <Button type="submit" disabled={loading} className="mt-2">

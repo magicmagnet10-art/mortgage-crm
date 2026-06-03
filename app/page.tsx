@@ -1,22 +1,18 @@
 import { createClient } from "@/lib/supabase/server";
-import { Client } from "@/lib/types";
+import { Client, Lead } from "@/lib/types";
 import { TASK_SECTION } from "@/lib/constants";
 import HomeView from "@/components/HomeView";
 
 export default async function Home() {
   const supabase = await createClient();
 
-  const { data: clients } = await supabase
-    .from("clients")
-    .select("*")
-    .order("created_at", { ascending: false });
+  const [{ data: clients }, { data: allEntries }, { data: leadsData }] = await Promise.all([
+    supabase.from("clients").select("*").order("created_at", { ascending: false }),
+    supabase.from("bank_log_entries").select("client_id, bank_name, content, created_at, is_task").order("created_at", { ascending: false }),
+    supabase.from("leads").select("*").order("created_at", { ascending: false }),
+  ]);
 
-  const { data: allEntries } = await supabase
-    .from("bank_log_entries")
-    .select("client_id, bank_name, content, created_at, is_task")
-    .order("created_at", { ascending: false });
-
-  // מיפוי כולל: clientId → bankName → תוכן אחרון (לטאב סטטוס)
+  // מיפוי כולל: clientId → bankName → תוכן אחרון
   const lastByClientBank: Record<string, Record<string, string>> = {};
   (allEntries ?? []).forEach((e) => {
     if (!lastByClientBank[e.client_id]) lastByClientBank[e.client_id] = {};
@@ -25,22 +21,27 @@ export default async function Home() {
     }
   });
 
-  // כל המשימות לכל לקוח (לכרטיס הרחב)
+  // כל המשימות לכל לקוח
   const tasksByClient: Record<string, Array<{ bank_name: string; content: string }>> = {};
   (allEntries ?? []).filter((e) => e.is_task).forEach((e) => {
     if (!tasksByClient[e.client_id]) tasksByClient[e.client_id] = [];
     tasksByClient[e.client_id].push({ bank_name: e.bank_name, content: e.content });
   });
 
-  const active = (clients ?? []).filter((c: Client) => !c.archived_at);
-  const archived = (clients ?? []).filter((c: Client) => !!c.archived_at);
+  const all = (clients ?? []) as Client[];
+  const active = all.filter((c) => !c.archived_at && !c.on_hold_at);
+  const onHold = all.filter((c) => !!c.on_hold_at && !c.archived_at);
+  const archived = all.filter((c) => !!c.archived_at);
 
   return (
     <HomeView
       active={active}
+      onHold={onHold}
       archived={archived}
+      leads={(leadsData ?? []) as Lead[]}
       tasksByClient={tasksByClient}
       lastByClientBank={lastByClientBank}
+      allClients={all.filter((c) => !c.archived_at)}
     />
   );
 }

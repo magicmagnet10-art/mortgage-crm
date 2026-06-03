@@ -7,6 +7,7 @@ import { BankLogEntry } from "@/lib/types";
 import BankSection from "@/components/BankSection";
 import EditClientDialog from "@/components/EditClientDialog";
 import ArchiveButton from "@/components/ArchiveButton";
+import ClientActions from "@/components/ClientActions";
 
 function formatCurrency(amount: number) {
   return new Intl.NumberFormat("he-IL", {
@@ -67,10 +68,7 @@ export default async function ClientPage({
         <div className="bg-white rounded-2xl border border-gray-100 p-5 mb-4 shadow-sm">
           <div className="flex items-start justify-between mb-4">
             <div />
-            <div className="flex gap-2">
-              <EditClientDialog client={client} />
-              <ArchiveButton clientId={client.id} isArchived={!!client.archived_at} />
-            </div>
+            <ClientActions client={client} />
           </div>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             <div>
@@ -123,8 +121,14 @@ export default async function ClientPage({
             {client.payment != null && (
               <div>
                 <p className="text-xs text-gray-400 mb-0.5">תשלום</p>
-                <p className="font-medium text-gray-800">
-                  {formatCurrency(client.payment)}
+                <p className="font-medium text-gray-800">{formatCurrency(client.payment)}</p>
+              </div>
+            )}
+            {client.next_payment_date && (
+              <div>
+                <p className="text-xs text-gray-400 mb-0.5">תאריך תשלום קרוב</p>
+                <p className="font-medium text-blue-700">
+                  📅 {new Date(client.next_payment_date).toLocaleDateString("he-IL")}
                 </p>
               </div>
             )}

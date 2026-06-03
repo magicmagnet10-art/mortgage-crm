@@ -9,7 +9,19 @@ export interface Client {
   residence: string | null;
   equity: number | null;
   payment: number | null;
+  next_payment_date: string | null;
+  on_hold_at: string | null;
   archived_at: string | null;
+  created_at: string;
+}
+
+export interface Lead {
+  id: string;
+  full_name: string;
+  source: string | null;
+  phone: string | null;
+  summary: string | null;
+  deal_price: number | null;
   created_at: string;
 }
 

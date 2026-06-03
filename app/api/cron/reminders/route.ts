@@ -19,10 +19,11 @@ export async function GET(req: NextRequest) {
   // Find due reminders not yet sent
   const { data: dueEntries } = await supabase
     .from("bank_log_entries")
-    .select("id, content, client_id, clients(full_name)")
-    .eq("bank_name", "משימות לקוח")
+    .select("id, content, bank_name, client_id, clients(full_name)")
+    .eq("is_task", true)
     .lte("remind_at", new Date().toISOString())
-    .is("reminded_at", null);
+    .is("reminded_at", null)
+    .is("done_at", null);
 
   if (!dueEntries || dueEntries.length === 0) {
     return NextResponse.json({ sent: 0 });
@@ -38,7 +39,7 @@ export async function GET(req: NextRequest) {
   for (const entry of dueEntries) {
     const client = (Array.isArray(entry.clients) ? entry.clients[0] : entry.clients) as { full_name: string } | null;
     const payload = JSON.stringify({
-      title: `משימה: ${client?.full_name ?? ""}`,
+      title: `📋 ${client?.full_name ?? ""} — ${entry.bank_name}`,
       body: entry.content,
     });
 

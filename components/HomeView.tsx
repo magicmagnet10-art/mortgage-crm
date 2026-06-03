@@ -73,7 +73,7 @@ export default function HomeView({
     { id: "active", label: "פעילים", count: active.length },
     { id: "hold", label: "המתנה", count: onHold.length },
     { id: "leads", label: "לידים", count: leads.length },
-    { id: "status", label: "סטטוס", count: clientsWithEntries.length },
+    { id: "status", label: "משימות", count: clientsWithEntries.length },
     { id: "archive", label: "ארכיון", count: archived.length },
   ];
 

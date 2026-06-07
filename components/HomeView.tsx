@@ -34,6 +34,10 @@ export default function HomeView({
   const [tab, setTab] = useState<Tab>("active");
   const router = useRouter();
 
+  // חיפוש לקוח
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
   // הוספת משימה מהסטטוס
   const [showAddTask, setShowAddTask] = useState(false);
   const [taskClient, setTaskClient] = useState("");
@@ -98,6 +102,12 @@ export default function HomeView({
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => { setShowSearch((v) => !v); setSearchQuery(""); }}
+              className="text-white/80 hover:text-white text-xs px-2 py-1.5 rounded-lg hover:bg-white/10 transition-colors flex items-center gap-1"
+            >
+              🔍 חיפוש
+            </button>
             {tab === "active" && <AddClientDialog />}
             {tab === "leads" && <AddLeadDialog />}
             <button onClick={handleLogout} className="text-white/70 hover:text-white text-xs px-2 py-1.5 rounded-lg hover:bg-white/10 transition-colors">
@@ -105,6 +115,46 @@ export default function HomeView({
             </button>
           </div>
         </div>
+
+        {/* Search bar */}
+        {showSearch && (
+          <div className="max-w-2xl mx-auto px-4 pb-3">
+            <input
+              autoFocus
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="חפש לקוח לפי שם או ת.ז..."
+              className="w-full px-4 py-2 rounded-xl text-sm bg-white/20 text-white placeholder-white/60 border border-white/30 outline-none focus:bg-white/30"
+            />
+            {searchQuery.trim() && (
+              <div className="mt-2 bg-white rounded-xl shadow-lg overflow-hidden">
+                {allClients
+                  .filter((c) =>
+                    c.full_name.includes(searchQuery.trim()) ||
+                    c.id_number.includes(searchQuery.trim())
+                  )
+                  .slice(0, 6)
+                  .map((c) => (
+                    <button
+                      key={c.id}
+                      onClick={() => { setShowSearch(false); setSearchQuery(""); router.push(`/clients/${c.id}`); }}
+                      className="w-full text-right px-4 py-3 text-sm hover:bg-blue-50 border-b border-gray-50 last:border-0 flex items-center justify-between"
+                    >
+                      <span className="font-semibold text-gray-800">{c.full_name}</span>
+                      <span className="text-gray-400 text-xs">{c.id_number}</span>
+                    </button>
+                  ))}
+                {allClients.filter((c) =>
+                  c.full_name.includes(searchQuery.trim()) ||
+                  c.id_number.includes(searchQuery.trim())
+                ).length === 0 && (
+                  <p className="px-4 py-3 text-sm text-gray-400">לא נמצאו תוצאות</p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Tabs */}
         <div className="max-w-2xl mx-auto px-4 pb-3">

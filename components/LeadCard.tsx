@@ -46,13 +46,24 @@ export default function LeadCard({ lead }: { lead: Lead }) {
         {expanded && (
           <div className="border-t border-gray-100 px-4 py-3 flex flex-col gap-2">
             {lead.phone && (
-              <a
-                href={`https://wa.me/${lead.phone.replace(/\D/g, "").replace(/^0/, "972")}`}
-                target="_blank" rel="noopener noreferrer"
-                className="text-sm text-green-600 hover:underline w-fit"
-              >
-                📱 {lead.phone}
-              </a>
+              <div className="flex flex-col gap-1">
+                <p className="text-sm text-gray-700 font-medium">{lead.phone}</p>
+                <div className="flex gap-2">
+                  <a
+                    href={`https://wa.me/${lead.phone.replace(/\D/g, "").replace(/^0/, "972")}`}
+                    target="_blank" rel="noopener noreferrer"
+                    className="text-xs px-2 py-1 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 font-medium"
+                  >
+                    📱 וואטסאפ
+                  </a>
+                  <a
+                    href={`tel:${lead.phone}`}
+                    className="text-xs px-2 py-1 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 font-medium"
+                  >
+                    📞 חיוג
+                  </a>
+                </div>
+              </div>
             )}
             {lead.deal_price && (
               <p className="text-sm text-gray-700"><span className="font-medium">מחיר עסקה:</span> {formatCurrency(lead.deal_price)}</p>

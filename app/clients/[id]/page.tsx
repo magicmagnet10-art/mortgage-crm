@@ -77,14 +77,23 @@ export default async function ClientPage({
             </div>
             <div>
               <p className="text-xs text-gray-400 mb-0.5">טלפון</p>
-              <a
-                href={`https://wa.me/${client.phone.replace(/\D/g, "").replace(/^0/, "972")}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-medium text-green-600 hover:underline flex items-center gap-1 w-fit"
-              >
-                📱 {client.phone}
-              </a>
+              <p className="font-medium text-gray-800 mb-1">{client.phone}</p>
+              <div className="flex gap-2">
+                <a
+                  href={`https://wa.me/${client.phone.replace(/\D/g, "").replace(/^0/, "972")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs px-2 py-1 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 font-medium"
+                >
+                  📱 וואטסאפ
+                </a>
+                <a
+                  href={`tel:${client.phone}`}
+                  className="text-xs px-2 py-1 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 font-medium"
+                >
+                  📞 חיוג
+                </a>
+              </div>
             </div>
             <div>
               <p className="text-xs text-gray-400 mb-0.5">סכום משכנתא</p>

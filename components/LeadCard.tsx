@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Lead } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/client";
@@ -25,7 +26,7 @@ export default function LeadCard({ lead }: { lead: Lead }) {
     <Card className="border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
       <CardContent className="p-0">
         <div className="flex items-stretch">
-          <div className="flex items-center gap-3 flex-1 min-w-0 px-4 py-3.5">
+          <Link href={`/leads/${lead.id}`} className="flex items-center gap-3 flex-1 min-w-0 px-4 py-3.5">
             <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
               <span className="text-sm font-black text-amber-600">{lead.full_name.charAt(0)}</span>
             </div>
@@ -33,7 +34,7 @@ export default function LeadCard({ lead }: { lead: Lead }) {
               <span className="text-sm font-bold text-gray-900 truncate block">{lead.full_name}</span>
               {lead.source && <span className="text-xs text-gray-400">מ: {lead.source}</span>}
             </div>
-          </div>
+          </Link>
           <button
             onClick={() => setExpanded((e) => !e)}
             className="flex items-center justify-center w-11 text-gray-300 text-sm shrink-0"

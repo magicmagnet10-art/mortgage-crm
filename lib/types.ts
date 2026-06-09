@@ -25,6 +25,17 @@ export interface Lead {
   created_at: string;
 }
 
+export interface LeadLogEntry {
+  id: string;
+  lead_id: string;
+  content: string;
+  is_task: boolean;
+  remind_at: string | null;
+  reminded_at: string | null;
+  done_at: string | null;
+  created_at: string;
+}
+
 export interface BankLogEntry {
   id: string;
   client_id: string;

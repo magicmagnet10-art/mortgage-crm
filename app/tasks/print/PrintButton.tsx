@@ -3,7 +3,7 @@
 export default function PrintButton() {
   const handlePDF = async () => {
     const html2pdf = (await import("html2pdf.js")).default;
-    const element = document.querySelector(".page") as HTMLElement;
+    const element = document.querySelector("[data-print-area]") as HTMLElement;
     html2pdf()
       .set({
         margin: 10,
@@ -17,27 +17,19 @@ export default function PrintButton() {
   };
 
   return (
-    <div style={{ position: "fixed", bottom: "24px", left: "24px", display: "flex", gap: "10px" }} className="screen-only">
+    <>
       <button
         onClick={() => window.print()}
-        style={{
-          background: "#1e40af", color: "white", border: "none",
-          padding: "12px 20px", borderRadius: "10px", fontSize: "14px",
-          fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
-        }}
+        style={{ background: "#1e40af", color: "white", border: "none", padding: "8px 18px", borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: "pointer" }}
       >
         🖨️ הדפס
       </button>
       <button
         onClick={handlePDF}
-        style={{
-          background: "#dc2626", color: "white", border: "none",
-          padding: "12px 20px", borderRadius: "10px", fontSize: "14px",
-          fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
-        }}
+        style={{ background: "#dc2626", color: "white", border: "none", padding: "8px 18px", borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: "pointer" }}
       >
         📄 שמור PDF
       </button>
-    </div>
+    </>
   );
 }

@@ -226,6 +226,14 @@ export default function HomeView({
         {/* סטטוס */}
         {tab === "status" && (
           <div className="flex flex-col gap-3">
+            {/* כפתור הדפסה */}
+            <Link
+              href="/tasks/print"
+              target="_blank"
+              className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-100 rounded-2xl shadow-sm text-sm font-semibold text-gray-600 hover:bg-gray-50 w-fit"
+            >
+              🖨️ הדפס משימות לבוקר
+            </Link>
             {/* הוספת משימה */}
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
               <button

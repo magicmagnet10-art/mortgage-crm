@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
-import { BANKS, TASK_SECTION, BANK_COLORS } from "@/lib/constants";
+import { BANK_COLORS } from "@/lib/constants";
+import PrintButton from "./PrintButton";
 
 export default async function PrintTasksPage() {
   const supabase = await createClient();
@@ -101,7 +102,7 @@ export default async function PrintTasksPage() {
           </div>
         </div>
 
-        <button className="print-btn screen-only" onClick="window.print()">🖨️ הדפס</button>
+        <PrintButton />
       </body>
     </html>
   );

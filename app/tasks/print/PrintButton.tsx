@@ -1,15 +1,22 @@
 "use client";
 
 export default function PrintButton() {
+  const isIOS = typeof navigator !== "undefined" && /iphone|ipad|ipod/i.test(navigator.userAgent);
+
   const handlePDF = async () => {
+    if (isIOS) {
+      // iOS: window.print פותח תצוגת הדפסה → לחץ שיתוף → שמור PDF בקבצים
+      window.print();
+      return;
+    }
+    // דסקטופ: הורדה ישירה
     const html2pdf = (await import("html2pdf.js")).default;
     const area = document.querySelector("[data-print-area]") as HTMLElement;
     if (!area) return;
     const noprint = area.querySelector(".no-print") as HTMLElement | null;
     if (noprint) noprint.style.display = "none";
-
     const filename = `משימות-${new Date().toLocaleDateString("he-IL").replace(/\//g, "-")}.pdf`;
-    const blob: Blob = await html2pdf()
+    await html2pdf()
       .set({
         margin: 10,
         filename,
@@ -18,23 +25,8 @@ export default function PrintButton() {
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
       })
       .from(area)
-      .outputPdf("blob");
-
+      .save();
     if (noprint) noprint.style.display = "flex";
-
-    // iOS / Android — פתח תפריט שיתוף טבעי
-    if (navigator.canShare && navigator.canShare({ files: [new File([blob], filename, { type: "application/pdf" })] })) {
-      const file = new File([blob], filename, { type: "application/pdf" });
-      await navigator.share({ files: [file], title: filename });
-    } else {
-      // דסקטופ — הורד ישירות
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = filename;
-      a.click();
-      URL.revokeObjectURL(url);
-    }
   };
 
   return (
@@ -49,7 +41,7 @@ export default function PrintButton() {
         onClick={handlePDF}
         style={{ background: "#dc2626", color: "white", border: "none", padding: "8px 18px", borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: "pointer" }}
       >
-        📄 שמור PDF
+        📄 {isIOS ? "שמור PDF" : "הורד PDF"}
       </button>
     </>
   );

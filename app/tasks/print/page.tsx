@@ -51,7 +51,7 @@ export default async function PrintTasksPage() {
         body { background: #f8fafc; font-family: 'Helvetica Neue', Arial, sans-serif; }
       `}</style>
 
-      <div dir="rtl" style={{ maxWidth: 800, margin: "0 auto", padding: 24, fontFamily: "Arial, sans-serif", direction: "rtl" }}>
+      <div data-print-area dir="rtl" style={{ maxWidth: 800, margin: "0 auto", padding: 24, fontFamily: "Arial, sans-serif", direction: "rtl" }}>
 
         {/* כפתורים - נסתרים בהדפסה */}
         <div className="no-print" style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>

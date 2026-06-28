@@ -3,17 +3,22 @@
 export default function PrintButton() {
   const handlePDF = async () => {
     const html2pdf = (await import("html2pdf.js")).default;
-    const element = document.querySelector("[data-print-area]") as HTMLElement;
-    html2pdf()
+    const area = document.querySelector("[data-print-area]") as HTMLElement;
+    if (!area) return;
+    // הסתר כפתורים לפני יצירת PDF
+    const noprint = area.querySelector(".no-print") as HTMLElement | null;
+    if (noprint) noprint.style.display = "none";
+    await html2pdf()
       .set({
         margin: 10,
         filename: `משימות-${new Date().toLocaleDateString("he-IL").replace(/\//g, "-")}.pdf`,
         image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
+        html2canvas: { scale: 2, useCORS: true, direction: "rtl" },
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
       })
-      .from(element)
+      .from(area)
       .save();
+    if (noprint) noprint.style.display = "flex";
   };
 
   return (

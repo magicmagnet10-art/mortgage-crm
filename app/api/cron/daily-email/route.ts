@@ -3,9 +3,8 @@ import { Resend } from "resend";
 import { createClient } from "@/lib/supabase/server";
 import { BANK_COLORS } from "@/lib/constants";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 export async function GET(req: NextRequest) {
+  const resend = new Resend(process.env.RESEND_API_KEY);
   const secret = req.headers.get("x-cron-secret");
   if (secret !== process.env.CRON_SECRET) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

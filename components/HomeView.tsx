@@ -79,13 +79,20 @@ export default function HomeView({
     if (!taskClient || !taskText.trim()) return;
     setTaskLoading(true);
     const supabase = createSupabaseClient();
-    await supabase.from("bank_log_entries").insert({
-      client_id: taskClient,
-      bank_name: taskBank,
-      content: taskText.trim(),
-      is_task: true,
-      ...(taskRemind ? { remind_at: new Date(taskRemind).toISOString() } : {}),
-    });
+    if (taskClient === "__general__") {
+      await supabase.from("general_tasks").insert({
+        content: taskText.trim(),
+        ...(taskRemind ? { remind_at: new Date(taskRemind).toISOString() } : {}),
+      });
+    } else {
+      await supabase.from("bank_log_entries").insert({
+        client_id: taskClient,
+        bank_name: taskBank,
+        content: taskText.trim(),
+        is_task: true,
+        ...(taskRemind ? { remind_at: new Date(taskRemind).toISOString() } : {}),
+      });
+    }
     setTaskLoading(false);
     setTaskText(""); setTaskRemind(""); setTaskClient(""); setShowAddTask(false);
     router.refresh();
@@ -281,21 +288,24 @@ export default function HomeView({
                       required
                     >
                       <option value="">בחר לקוח...</option>
+                      <option value="__general__">📌 כללי (לא משויך ללקוח)</option>
                       {allClients.map((c) => (
                         <option key={c.id} value={c.id}>{c.full_name}</option>
                       ))}
                     </select>
                   </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs text-gray-500">בנק / קטגוריה</label>
-                    <select
-                      value={taskBank}
-                      onChange={(e) => setTaskBank(e.target.value)}
-                      className="border border-gray-200 rounded-lg px-3 py-2 text-sm"
-                    >
-                      {allSections.map((b) => <option key={b} value={b}>{b}</option>)}
-                    </select>
-                  </div>
+                  {taskClient !== "__general__" && (
+                    <div className="flex flex-col gap-1">
+                      <label className="text-xs text-gray-500">בנק / קטגוריה</label>
+                      <select
+                        value={taskBank}
+                        onChange={(e) => setTaskBank(e.target.value)}
+                        className="border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                      >
+                        {allSections.map((b) => <option key={b} value={b}>{b}</option>)}
+                      </select>
+                    </div>
+                  )}
                   <div className="flex flex-col gap-1">
                     <label className="text-xs text-gray-500">תוכן המשימה</label>
                     <textarea

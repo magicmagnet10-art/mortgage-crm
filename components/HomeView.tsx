@@ -336,34 +336,7 @@ export default function HomeView({
               )}
             </div>
 
-            {clientsWithEntries.length === 0 ? (
-              <div className="text-center py-16 text-gray-400">אין רשומות עדיין</div>
-            ) : (
-              clientsWithEntries.map((client) => {
-                const clientBanks = allSections.filter((bank) => lastByClientBank[client.id]?.[bank]);
-                return (
-                  <div key={client.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-                    <Link href={`/clients/${client.id}`} className="block px-4 py-3 border-b border-gray-50 hover:bg-gray-50 flex items-center justify-between">
-                      <span className="font-bold text-blue-700">{client.full_name}</span>
-                      <span className="text-xs text-gray-400">{client.id_number}</span>
-                    </Link>
-                    <div className="divide-y divide-gray-50">
-                      {clientBanks.map((bank) => {
-                        const colors = BANK_COLORS[bank] ?? { titleColor: "#4b5563" };
-                        return (
-                          <div key={bank} className="px-4 py-2.5 flex items-start gap-3">
-                            <span className="text-xs font-bold shrink-0 mt-0.5 min-w-[85px]" style={{ color: colors.titleColor }}>{bank}</span>
-                            <p className="text-sm text-gray-500 line-clamp-1 flex-1">{lastByClientBank[client.id][bank]}</p>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })
-            )}
-
-            {/* משימות כלליות */}
+            {/* משימות כלליות - ראשון */}
             <div className="bg-white rounded-2xl border-2 border-orange-200 shadow-sm overflow-hidden">
               <p className="px-4 py-3 text-sm font-bold text-orange-700 border-b border-orange-100">📌 משימות כלליות</p>
 
@@ -416,6 +389,34 @@ export default function HomeView({
                 </div>
               </form>
             </div>
+
+            {/* לקוחות */}
+            {clientsWithEntries.length === 0 ? (
+              <div className="text-center py-8 text-gray-400 text-sm">אין רשומות לקוחות עדיין</div>
+            ) : (
+              clientsWithEntries.map((client) => {
+                const clientBanks = allSections.filter((bank) => lastByClientBank[client.id]?.[bank]);
+                return (
+                  <div key={client.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                    <Link href={`/clients/${client.id}`} className="block px-4 py-3 border-b border-gray-50 hover:bg-gray-50 flex items-center justify-between">
+                      <span className="font-bold text-blue-700">{client.full_name}</span>
+                      <span className="text-xs text-gray-400">{client.id_number}</span>
+                    </Link>
+                    <div className="divide-y divide-gray-50">
+                      {clientBanks.map((bank) => {
+                        const colors = BANK_COLORS[bank] ?? { titleColor: "#4b5563" };
+                        return (
+                          <div key={bank} className="px-4 py-2.5 flex items-start gap-3">
+                            <span className="text-xs font-bold shrink-0 mt-0.5 min-w-[85px]" style={{ color: colors.titleColor }}>{bank}</span>
+                            <p className="text-sm text-gray-500 line-clamp-1 flex-1">{lastByClientBank[client.id][bank]}</p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
         )}
 

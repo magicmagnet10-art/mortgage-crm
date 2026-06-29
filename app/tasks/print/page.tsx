@@ -12,12 +12,15 @@ export default async function PrintTasksPage() {
     weekday: "long", day: "numeric", month: "long", year: "numeric",
   });
 
-  const [{ data: clients }, { data: allEntries }] = await Promise.all([
+  const [{ data: clients }, { data: allEntries }, { data: generalTasksData }] = await Promise.all([
     supabase.from("clients").select("id, full_name, id_number, archived_at, on_hold_at"),
     supabase.from("bank_log_entries")
       .select("client_id, bank_name, content, is_task, done_at, remind_at, created_at")
       .order("created_at", { ascending: false }),
+    supabase.from("general_tasks").select("*").is("done_at", null).order("created_at", { ascending: false }),
   ]);
+
+  const generalTasks = generalTasksData ?? [];
 
   const activeClients = (clients ?? []).filter((c) => !c.archived_at && !c.on_hold_at);
   const activeIds = new Set(activeClients.map((c) => c.id));
@@ -69,6 +72,31 @@ export default async function PrintTasksPage() {
           </div>
           <p style={{ fontSize: 13, color: "#6b7280" }}>{clientsWithEntries.length} לקוחות · {totalEntries} רשומות</p>
         </div>
+
+        {/* משימות כלליות - ראשונות */}
+        {generalTasks.length > 0 && (
+          <div style={{ marginBottom: 24, pageBreakInside: "avoid" }}>
+            <div style={{ fontSize: 15, fontWeight: 800, color: "#c2410c", background: "#fff7ed", padding: "6px 12px", borderRadius: 6, marginBottom: 4, border: "2px solid #fed7aa" }}>
+              📌 משימות כלליות
+            </div>
+            {generalTasks.map((t: { id: string; content: string; remind_at: string | null; created_at: string }) => (
+              <div key={t.id} style={{ display: "flex", alignItems: "flex-start", gap: 10, padding: "6px 12px", borderBottom: "1px solid #f3f4f6" }}>
+                <div style={{ width: 16, height: 16, border: "2px solid #fb923c", borderRadius: 3, marginTop: 2, flexShrink: 0 }} />
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontSize: 13, color: "#1f2937", margin: 0 }}>{t.content}</p>
+                  <p style={{ fontSize: 10, color: "#9ca3af", margin: "2px 0 0" }}>
+                    נרשם: {new Date(t.created_at).toLocaleDateString("he-IL", { day: "2-digit", month: "2-digit", year: "2-digit" })}
+                  </p>
+                  {t.remind_at && (
+                    <p style={{ fontSize: 11, color: "#7c3aed", margin: "2px 0 0" }}>
+                      🔔 {new Date(t.remind_at).toLocaleString("he-IL", { day: "2-digit", month: "2-digit", year: "2-digit", hour: "2-digit", minute: "2-digit" })}
+                    </p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* תוכן */}
         {clientsWithEntries.length === 0 ? (

@@ -305,8 +305,9 @@ export default function HomeView({
                 const clientBanks = allSections.filter((bank) => lastByClientBank[client.id]?.[bank]);
                 return (
                   <div key={client.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-                    <Link href={`/clients/${client.id}`} className="block px-4 py-3 border-b border-gray-50 hover:bg-gray-50">
+                    <Link href={`/clients/${client.id}`} className="block px-4 py-3 border-b border-gray-50 hover:bg-gray-50 flex items-center justify-between">
                       <span className="font-bold text-blue-700">{client.full_name}</span>
+                      <span className="text-xs text-gray-400">{client.id_number}</span>
                     </Link>
                     <div className="divide-y divide-gray-50">
                       {clientBanks.map((bank) => {

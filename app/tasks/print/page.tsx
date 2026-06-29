@@ -13,7 +13,7 @@ export default async function PrintTasksPage() {
   });
 
   const [{ data: clients }, { data: allEntries }] = await Promise.all([
-    supabase.from("clients").select("id, full_name, archived_at, on_hold_at"),
+    supabase.from("clients").select("id, full_name, id_number, archived_at, on_hold_at"),
     supabase.from("bank_log_entries")
       .select("client_id, bank_name, content, is_task, done_at, remind_at, created_at")
       .order("created_at", { ascending: false }),
@@ -22,13 +22,13 @@ export default async function PrintTasksPage() {
   const activeClients = (clients ?? []).filter((c) => !c.archived_at && !c.on_hold_at);
   const activeIds = new Set(activeClients.map((c) => c.id));
 
-  const lastByClientBank: Record<string, Record<string, { content: string; is_task: boolean; done_at: string | null; remind_at: string | null }>> = {};
+  const lastByClientBank: Record<string, Record<string, { content: string; is_task: boolean; done_at: string | null; remind_at: string | null; created_at: string }>> = {};
   (allEntries ?? []).forEach((e) => {
     if (!activeIds.has(e.client_id)) return;
     if (!lastByClientBank[e.client_id]) lastByClientBank[e.client_id] = {};
     if (!lastByClientBank[e.client_id][e.bank_name]) {
       lastByClientBank[e.client_id][e.bank_name] = {
-        content: e.content, is_task: e.is_task, done_at: e.done_at, remind_at: e.remind_at,
+        content: e.content, is_task: e.is_task, done_at: e.done_at, remind_at: e.remind_at, created_at: e.created_at,
       };
     }
   });
@@ -78,8 +78,9 @@ export default async function PrintTasksPage() {
             const clientBanks = allSections.filter((bank) => lastByClientBank[client.id]?.[bank]);
             return (
               <div key={client.id} style={{ marginBottom: 18, pageBreakInside: "avoid" }}>
-                <div style={{ fontSize: 15, fontWeight: 800, color: "#1e40af", background: "#eff6ff", padding: "6px 12px", borderRadius: 6, marginBottom: 4 }}>
-                  {client.full_name}
+                <div style={{ fontSize: 15, fontWeight: 800, color: "#1e40af", background: "#eff6ff", padding: "6px 12px", borderRadius: 6, marginBottom: 4, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span>{client.full_name}</span>
+                  <span style={{ fontSize: 12, fontWeight: 500, color: "#6b7280" }}>{(client as unknown as { id_number?: string }).id_number ?? ""}</span>
                 </div>
                 {clientBanks.map((bank) => {
                   const entry = lastByClientBank[client.id][bank];
@@ -95,6 +96,9 @@ export default async function PrintTasksPage() {
                           )}
                           {entry.done_at && <span style={{ fontSize: 10, color: "#16a34a", marginLeft: 4 }}>✓ </span>}
                           {entry.content}
+                        </p>
+                        <p style={{ fontSize: 10, color: "#9ca3af", margin: "2px 0 0" }}>
+                          נרשם: {new Date(entry.created_at).toLocaleDateString("he-IL", { day: "2-digit", month: "2-digit", year: "2-digit" })}
                         </p>
                         {entry.is_task && entry.remind_at && !entry.done_at && (
                           <p style={{ fontSize: 11, color: "#7c3aed", margin: "2px 0 0" }}>

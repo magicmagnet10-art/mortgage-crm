@@ -25,6 +25,15 @@ export interface Lead {
   created_at: string;
 }
 
+export interface GeneralTask {
+  id: string;
+  content: string;
+  done_at: string | null;
+  remind_at: string | null;
+  reminded_at: string | null;
+  created_at: string;
+}
+
 export interface LeadLogEntry {
   id: string;
   lead_id: string;

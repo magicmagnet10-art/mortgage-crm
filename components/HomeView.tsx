@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Client, Lead } from "@/lib/types";
+import { Client, Lead, GeneralTask } from "@/lib/types";
 import ClientCard from "@/components/ClientCard";
 import LeadCard from "@/components/LeadCard";
 import AddClientDialog from "@/components/AddClientDialog";
@@ -22,6 +22,7 @@ export default function HomeView({
   tasksByClient,
   lastByClientBank,
   allClients,
+  generalTasks,
 }: {
   active: Client[];
   onHold: Client[];
@@ -30,6 +31,7 @@ export default function HomeView({
   tasksByClient: Record<string, Array<{ bank_name: string; content: string }>>;
   lastByClientBank: Record<string, Record<string, string>>;
   allClients: Client[];
+  generalTasks: GeneralTask[];
 }) {
   const [tab, setTab] = useState<Tab>("active");
   const router = useRouter();
@@ -37,6 +39,32 @@ export default function HomeView({
   // חיפוש לקוח
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+
+  // משימות כלליות
+  const [generalText, setGeneralText] = useState("");
+  const [generalRemind, setGeneralRemind] = useState("");
+  const [generalLoading, setGeneralLoading] = useState(false);
+
+  const handleAddGeneral = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!generalText.trim()) return;
+    setGeneralLoading(true);
+    const supabase = createSupabaseClient();
+    await supabase.from("general_tasks").insert({
+      content: generalText.trim(),
+      ...(generalRemind ? { remind_at: new Date(generalRemind).toISOString() } : {}),
+    });
+    setGeneralLoading(false);
+    setGeneralText("");
+    setGeneralRemind("");
+    router.refresh();
+  };
+
+  const handleDoneGeneral = async (id: string) => {
+    const supabase = createSupabaseClient();
+    await supabase.from("general_tasks").update({ done_at: new Date().toISOString() }).eq("id", id);
+    router.refresh();
+  };
 
   // הוספת משימה מהסטטוס
   const [showAddTask, setShowAddTask] = useState(false);
@@ -324,6 +352,60 @@ export default function HomeView({
                 );
               })
             )}
+
+            {/* משימות כלליות */}
+            <div className="bg-white rounded-2xl border-2 border-orange-200 shadow-sm overflow-hidden">
+              <p className="px-4 py-3 text-sm font-bold text-orange-700 border-b border-orange-100">📌 משימות כלליות</p>
+
+              {/* רשימה */}
+              {generalTasks.length > 0 && (
+                <div className="divide-y divide-gray-50">
+                  {generalTasks.map((t) => (
+                    <div key={t.id} className="px-4 py-3 flex items-start gap-3">
+                      <button
+                        onClick={() => handleDoneGeneral(t.id)}
+                        className="w-5 h-5 mt-0.5 shrink-0 rounded border-2 border-orange-300 hover:bg-orange-50 flex items-center justify-center"
+                        title="סמן כבוצע"
+                      >
+                        <span className="text-xs text-orange-400">✓</span>
+                      </button>
+                      <div className="flex-1">
+                        <p className="text-sm text-gray-800">{t.content}</p>
+                        {t.remind_at && (
+                          <p className="text-xs text-purple-500 mt-0.5">🔔 {new Date(t.remind_at).toLocaleString("he-IL", { day: "2-digit", month: "2-digit", year: "2-digit", hour: "2-digit", minute: "2-digit" })}</p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* טופס הוספה */}
+              <form onSubmit={handleAddGeneral} className="px-4 py-3 border-t border-orange-100 flex flex-col gap-2">
+                <textarea
+                  rows={2}
+                  placeholder="הוסף משימה כללית..."
+                  value={generalText}
+                  onChange={(e) => setGeneralText(e.target.value)}
+                  className="border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none outline-none focus:border-orange-300 w-full"
+                />
+                <div className="flex gap-2 items-center flex-wrap">
+                  <input
+                    type="datetime-local"
+                    value={generalRemind}
+                    onChange={(e) => setGeneralRemind(e.target.value)}
+                    className="border border-gray-200 rounded-lg px-2 py-1.5 text-xs flex-1 min-w-0"
+                  />
+                  <button
+                    type="submit"
+                    disabled={generalLoading || !generalText.trim()}
+                    className="px-4 py-1.5 bg-orange-600 text-white text-sm font-semibold rounded-lg disabled:opacity-40 shrink-0"
+                  >
+                    {generalLoading ? "..." : "+ הוסף"}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         )}
 

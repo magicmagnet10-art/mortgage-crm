@@ -1,15 +1,16 @@
 import { createClient } from "@/lib/supabase/server";
-import { Client, Lead } from "@/lib/types";
+import { Client, Lead, GeneralTask } from "@/lib/types";
 import { TASK_SECTION } from "@/lib/constants";
 import HomeView from "@/components/HomeView";
 
 export default async function Home() {
   const supabase = await createClient();
 
-  const [{ data: clients }, { data: allEntries }, { data: leadsData }] = await Promise.all([
+  const [{ data: clients }, { data: allEntries }, { data: leadsData }, { data: generalTasksData }] = await Promise.all([
     supabase.from("clients").select("*").order("created_at", { ascending: false }),
     supabase.from("bank_log_entries").select("client_id, bank_name, content, created_at, is_task").order("created_at", { ascending: false }),
     supabase.from("leads").select("*").order("created_at", { ascending: false }),
+    supabase.from("general_tasks").select("*").is("done_at", null).order("created_at", { ascending: false }),
   ]);
 
   // מיפוי כולל: clientId → bankName → תוכן אחרון
@@ -42,6 +43,7 @@ export default async function Home() {
       tasksByClient={tasksByClient}
       lastByClientBank={lastByClientBank}
       allClients={all.filter((c) => !c.archived_at)}
+      generalTasks={(generalTasksData ?? []) as GeneralTask[]}
     />
   );
 }

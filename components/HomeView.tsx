@@ -186,7 +186,7 @@ export default function HomeView({
           ) : (
             <div className="grid gap-2.5">
               {active.map((client) => (
-                <ClientCard key={client.id} client={client} tasks={tasksByClient[client.id] ?? []} />
+                <ClientCard key={client.id} client={client} tasks={tasksByClient[client.id] ?? []} lastByBank={lastByClientBank[client.id] ?? {}} />
               ))}
             </div>
           )
@@ -201,7 +201,7 @@ export default function HomeView({
           ) : (
             <div className="grid gap-2.5">
               {onHold.map((client) => (
-                <ClientCard key={client.id} client={client} tasks={tasksByClient[client.id] ?? []} />
+                <ClientCard key={client.id} client={client} tasks={tasksByClient[client.id] ?? []} lastByBank={lastByClientBank[client.id] ?? {}} />
               ))}
             </div>
           )
@@ -334,7 +334,7 @@ export default function HomeView({
           ) : (
             <div className="grid gap-2.5">
               {archived.map((client) => (
-                <ClientCard key={client.id} client={client} tasks={tasksByClient[client.id] ?? []} />
+                <ClientCard key={client.id} client={client} tasks={tasksByClient[client.id] ?? []} lastByBank={lastByClientBank[client.id] ?? {}} />
               ))}
             </div>
           )

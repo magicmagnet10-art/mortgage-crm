@@ -17,9 +17,11 @@ function formatCurrency(amount: number) {
 export default function ClientCard({
   client,
   tasks = [],
+  lastByBank = {},
 }: {
   client: Client;
   tasks?: Array<{ bank_name: string; content: string }>;
+  lastByBank?: Record<string, string>;
 }) {
   const [expanded, setExpanded] = useState(false);
 
@@ -57,26 +59,44 @@ export default function ClientCard({
         {/* תוכן מורחב */}
         {expanded && (
           <div className="border-t border-gray-100">
-            {/* משימות */}
-            {tasks.length > 0 ? (
-              <div className="divide-y divide-gray-50">
-                {tasks.map((t, i) => {
-                  const colors = BANK_COLORS[t.bank_name] ?? { titleColor: "#4b5563" };
-                  return (
-                    <div key={i} className="px-4 py-2.5 flex items-start gap-2">
-                      <span
-                        className="text-xs font-semibold shrink-0 mt-0.5 min-w-[80px]"
-                        style={{ color: colors.titleColor }}
-                      >
-                        {t.bank_name}
-                      </span>
-                      <p className="text-xs text-gray-700 line-clamp-2 flex-1">{t.content}</p>
-                    </div>
-                  );
-                })}
+            {/* משימות פתוחות */}
+            {tasks.length > 0 && (
+              <div>
+                <p className="px-4 pt-2.5 pb-1 text-xs font-bold text-purple-600">📋 משימות פתוחות</p>
+                <div className="divide-y divide-gray-50">
+                  {tasks.map((t, i) => {
+                    const colors = BANK_COLORS[t.bank_name] ?? { titleColor: "#4b5563" };
+                    return (
+                      <div key={i} className="px-4 py-2 flex items-start gap-2">
+                        <span className="text-xs font-semibold shrink-0 mt-0.5 min-w-[80px]" style={{ color: colors.titleColor }}>{t.bank_name}</span>
+                        <p className="text-xs text-gray-700 line-clamp-2 flex-1">{t.content}</p>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            ) : (
-              <p className="px-4 py-3 text-xs text-gray-400">אין משימות פתוחות</p>
+            )}
+
+            {/* הערה אחרונה מכל בנק */}
+            {Object.keys(lastByBank).length > 0 && (
+              <div className={tasks.length > 0 ? "border-t border-gray-100" : ""}>
+                <p className="px-4 pt-2.5 pb-1 text-xs font-bold text-blue-500">🏦 סטטוס בנקים</p>
+                <div className="divide-y divide-gray-50">
+                  {Object.entries(lastByBank).map(([bank, content]) => {
+                    const colors = BANK_COLORS[bank] ?? { titleColor: "#4b5563" };
+                    return (
+                      <div key={bank} className="px-4 py-2 flex items-start gap-2">
+                        <span className="text-xs font-semibold shrink-0 mt-0.5 min-w-[80px]" style={{ color: colors.titleColor }}>{bank}</span>
+                        <p className="text-xs text-gray-500 line-clamp-2 flex-1">{content}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {tasks.length === 0 && Object.keys(lastByBank).length === 0 && (
+              <p className="px-4 py-3 text-xs text-gray-400">אין רשומות עדיין</p>
             )}
 
             {/* פרטי לקוח */}

@@ -5,7 +5,14 @@ import Link from "next/link";
 
 const allSections = [TASK_SECTION, ...BANKS];
 
-export default async function PrintTasksPage() {
+export default async function PrintTasksPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ h?: string }>;
+}) {
+  const params = await searchParams;
+  const hiddenSet = new Set((params?.h ?? "").split(",").filter(Boolean));
+
   const supabase = await createClient();
 
   const today = new Date().toLocaleDateString("he-IL", {
@@ -103,7 +110,10 @@ export default async function PrintTasksPage() {
           <p style={{ textAlign: "center", padding: "60px 0", color: "#9ca3af", fontSize: 16 }}>אין רשומות עדיין 🎉</p>
         ) : (
           clientsWithEntries.map((client) => {
-            const clientBanks = allSections.filter((bank) => lastByClientBank[client.id]?.[bank]);
+            const clientBanks = allSections.filter(
+              (bank) => lastByClientBank[client.id]?.[bank] && !hiddenSet.has(`${client.id}::${bank}`)
+            );
+            if (clientBanks.length === 0) return null;
             return (
               <div key={client.id} style={{ marginBottom: 18, pageBreakInside: "avoid" }}>
                 <div style={{ fontSize: 15, fontWeight: 800, color: "#1e40af", background: "#eff6ff", padding: "6px 12px", borderRadius: 6, marginBottom: 4, display: "flex", justifyContent: "space-between", alignItems: "center" }}>

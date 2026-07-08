@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -35,6 +35,28 @@ export default function HomeView({
 }) {
   const [tab, setTab] = useState<Tab>("active");
   const router = useRouter();
+
+  // הסתרת בנקים בסטטוס
+  const [hiddenBanks, setHiddenBanks] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("nscc_hidden_banks");
+      if (saved) setHiddenBanks(new Set(JSON.parse(saved)));
+    } catch {}
+  }, []);
+
+  const toggleHidden = (clientId: string, bank: string) => {
+    const key = `${clientId}::${bank}`;
+    setHiddenBanks((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key); else next.add(key);
+      localStorage.setItem("nscc_hidden_banks", JSON.stringify([...next]));
+      return next;
+    });
+  };
+
+  const hiddenParam = [...hiddenBanks].join(",");
 
   // חיפוש לקוח
   const [showSearch, setShowSearch] = useState(false);
@@ -263,7 +285,7 @@ export default function HomeView({
           <div className="flex flex-col gap-3">
             {/* כפתור הדפסה */}
             <Link
-              href="/tasks/print"
+              href={hiddenParam ? `/tasks/print?h=${encodeURIComponent(hiddenParam)}` : "/tasks/print"}
               target="_blank"
               className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-100 rounded-2xl shadow-sm text-sm font-semibold text-gray-600 hover:bg-gray-50 w-fit"
             >
@@ -396,6 +418,8 @@ export default function HomeView({
             ) : (
               clientsWithEntries.map((client) => {
                 const clientBanks = allSections.filter((bank) => lastByClientBank[client.id]?.[bank]);
+                const visibleBanks = clientBanks.filter((bank) => !hiddenBanks.has(`${client.id}::${bank}`));
+                const hiddenCount = clientBanks.length - visibleBanks.length;
                 return (
                   <div key={client.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                     <Link href={`/clients/${client.id}`} className="block px-4 py-3 border-b border-gray-50 hover:bg-gray-50 flex items-center justify-between">
@@ -403,15 +427,34 @@ export default function HomeView({
                       <span className="text-xs text-gray-400">{client.id_number}</span>
                     </Link>
                     <div className="divide-y divide-gray-50">
-                      {clientBanks.map((bank) => {
+                      {visibleBanks.map((bank) => {
                         const colors = BANK_COLORS[bank] ?? { titleColor: "#4b5563" };
                         return (
-                          <div key={bank} className="px-4 py-2.5 flex items-start gap-3">
-                            <span className="text-xs font-bold shrink-0 mt-0.5 min-w-[85px]" style={{ color: colors.titleColor }}>{bank}</span>
+                          <div key={bank} className="px-4 py-2.5 flex items-center gap-3">
+                            <span className="text-xs font-bold shrink-0 min-w-[85px]" style={{ color: colors.titleColor }}>{bank}</span>
                             <p className="text-sm text-gray-500 line-clamp-1 flex-1">{lastByClientBank[client.id][bank]}</p>
+                            <button
+                              onClick={() => toggleHidden(client.id, bank)}
+                              className="shrink-0 text-gray-300 hover:text-gray-500 text-base leading-none"
+                              title="הסתר"
+                            >👁</button>
                           </div>
                         );
                       })}
+                      {hiddenCount > 0 && (
+                        <div className="px-4 py-2 flex flex-wrap gap-1.5">
+                          {clientBanks.filter((bank) => hiddenBanks.has(`${client.id}::${bank}`)).map((bank) => (
+                            <button
+                              key={bank}
+                              onClick={() => toggleHidden(client.id, bank)}
+                              className="text-xs px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600"
+                              title="הצג"
+                            >
+                              🔒 {bank}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
